@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>菜谱可视化系统 - Recipe Visualizer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .header h1 { color: #1a1a2e; font-size: 28px; margin-bottom: 8px; }
+    .header .subtitle { color: #666; font-size: 14px; }
+    .header-actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+    .btn-secondary { background: #f0f0f0; color: #333; }
+    .btn-secondary:hover { background: #e0e0e0; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-danger:hover { background: #c82333; }
+    .main-content { display: grid; grid-template-columns: 1fr 400px; gap: 20px; }
+    @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; } }
+    .recipe-list-panel, .timeline-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .recipe-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .recipe-count { background: #667eea; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .recipe-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      position: relative;
+    }
+    .recipe-card:hover { border-color: #667eea; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .recipe-card.active { border-color: #667eea; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); }
+    .recipe-card-header { display: flex; gap: 12px; margin-bottom: 12px; }
+    .recipe-card-img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; background: #f0f0f0; }
+    .recipe-card-info { flex: 1; }
+    .recipe-card-name { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .recipe-card-id { font-size: 12px; color: #999; margin-bottom: 8px; }
+    .recipe-card-meta { display: flex; gap: 12px; font-size: 12px; color: #666; }
+    .status-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-normal { background: #d4edda; color: #155724; }
+    .status-warning { background: #fff3cd; color: #856404; }
+    .status-error { background: #f8d7da; color: #721c24; }
+    .timeline-header { margin-bottom: 20px; }
+    .timeline-header h2 { font-size: 18px; color: #333; margin-bottom: 8px; }
+    .recipe-name { font-size: 24px; font-weight: 700; color: #667eea; }
+    .legend { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .legend-dot.device { background: #667eea; }
+    .legend-dot.manual { background: #28a745; }
+    .legend-dot.auto { background: #ffc107; }
+    .timeline-container { flex: 1; overflow-y: auto; max-height: 500px; }
+    .timeline { position: relative; padding-left: 80px; padding-bottom: 20px; }
+    .timeline-axis { position: absolute; left: 40px; top: 0; bottom: 0; width: 4px; background: linear-gradient(to bottom, #667eea, #764ba2); border-radius: 2px; }
+    .timeline-time-marker { position: absolute; left: 20px; font-size: 11px; color: #999; transform: translateY(-50%); }
+    .timeline-event { position: relative; margin-bottom: 16px; cursor: pointer; transition: all 0.2s; }
+    .timeline-event:hover { transform: translateX(4px); }
+    .timeline-event-dot { position: absolute; left: -48px; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .timeline-event-dot.device { background: #667eea; }
+    .timeline-event-dot.manual { background: #28a745; }
+    .timeline-event-dot.auto { background: #ffc107; }
+    .timeline-event-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px 16px;
+      border-left: 4px solid;
+      transition: all 0.2s;
+    }
+    .timeline-event-card:hover { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .timeline-event-card.device { border-left-color: #667eea; }
+    .timeline-event-card.manual { border-left-color: #28a745; }
+    .timeline-event-card.auto { border-left-color: #ffc107; }
+    .timeline-event-card.selected { background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2); }
+    .timeline-event-time { font-size: 12px; color: #999; margin-bottom: 4px; }
+    .timeline-event-command { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 4px; }
+    .timeline-event-detail { font-size: 12px; color: #666; }
+    .timeline-event-warning { margin-top: 8px; padding: 8px; background: #fff3cd; border-radius: 4px; font-size: 11px; color: #856404; }
+    .detail-panel { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 20px; }
+    .detail-panel h3 { font-size: 16px; color: #333; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e0e0e0; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .detail-item { background: #f8f9fa; padding: 12px; border-radius: 8px; }
+    .detail-item-label { font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 4px; }
+    .detail-item-value { font-size: 14px; color: #333; font-weight: 500; }
+    .detail-full { grid-column: 1 / -1; }
+    .ingredients-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    .ingredients-table th, .ingredients-table td { padding: 10px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 13px; }
+    .ingredients-table th { background: #f8f9fa; font-weight: 600; color: #666; }
+    .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 12px; }
+    .images-grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
+    .images-grid img:hover { transform: scale(1.05); }
+    .stats-bar { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat-item { background: white; border-radius: 8px; padding: 16px 24px; flex: 1; min-width: 150px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .stat-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+    .stat-value { font-size: 24px; font-weight: 700; color: #667eea; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+    .empty-state-icon { font-size: 64px; margin-bottom: 16px; }
+    .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: #999; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #999; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍳 菜谱可视化系统 <span style="font-size: 14px; font-weight: normal; color: #999;">Recipe Visualizer</span></h1>
+      <p class="subtitle">智能烹饪设备 SOP 时间轴展示 · 内部研发评审工具</p>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📁 导入菜谱数据</button>
+        <button class="btn btn-secondary" onclick="loadSampleData()">📊 加载示例数据</button>
+        <button class="btn btn-danger" onclick="clearCacheAndReload()">🔄 清除缓存并刷新</button>
+      </div>
+      <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="handleFileUpload(event)">
+    </div>
+    
+    <div class="stats-bar" id="statsBar" style="display: none;">
+      <div class="stat-item">
+        <div class="stat-label">总菜谱数</div>
+        <div class="stat-value" id="statTotal">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">正常</div>
+        <div class="stat-value" id="statNormal" style="color: #28a745;">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">警告</div>
+        <div class="stat-value" id="statWarning" style="color: #ffc107;">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">异常</div>
+        <div class="stat-value" id="statError" style="color: #dc3545;">0</div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="recipe-list-panel">
+        <div class="recipe-list-header">
+          <h2>📋 菜谱列表</h2>
+          <span class="recipe-count" id="recipeCount">0 个菜谱</span>
+        </div>
+        <div class="recipe-grid" id="recipeGrid">
+          <div class="loading">
+            <div class="spinner"></div>
+            <span>正在加载菜谱数据...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-panel">
+        <div class="timeline-header">
+          <h2>⏱️ 烹饪时间轴</h2>
+          <div class="recipe-name" id="timelineRecipeName">请选择菜谱</div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot device"></div><span>设备控制</span></div>
+          <div class="legend-item"><div class="legend-dot manual"></div><span>手动投料</span></div>
+          <div class="legend-item"><div class="legend-dot auto"></div><span>自动投料</span></div>
+        </div>
+        <div class="timeline-container">
+          <div class="timeline" id="timeline">
+            <div class="timeline-axis"></div>
+          </div>
+        </div>
+        <div class="detail-panel" id="detailPanel" style="display: none;">
+          <h3>📊 步骤详情</h3>
+          <div id="detailContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let recipes = [];
+    let selectedRecipe = null;
+    let selectedStep = null;
+
+    // 强制清除缓存并重新加载
+    async function clearCacheAndReload() {
+      localStorage.removeItem('recipeVisualizerData');
+      recipes = [];
+      selectedRecipe = null;
+      document.getElementById('recipeGrid').innerHTML = '<div class="loading"><div class="spinner"></div><span>正在重新加载...</span></div>';
+      await loadRecipesFromData();
+      alert('缓存已清除，数据已重新加载！');
+    }
+
+    // 从数据文件加载
+    async function loadRecipesFromData() {
+      try {
+        const response = await fetch('data/recipes.json?t=' + Date.now());
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            recipes = data;
+            saveToLocalStorage();
+            renderRecipeList();
+            updateStats();
+            if (recipes.length > 0) selectRecipe(recipes[0]);
+            console.log(`✅ Loaded ${recipes.length} recipes from data file`);
+            return true;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load data:', e);
+      }
+      return false;
+    }
+
+    // 保存到本地存储
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem('recipeVisualizerData', JSON.stringify(recipes));
+      } catch (e) {
+        console.warn('LocalStorage save failed:', e);
+      }
+    }
+
+    // 从本地存储加载
+    function loadFromLocalStorage() {
+      try {
+        const data = localStorage.getItem('recipeVisualizerData');
+        if (data) {
+          recipes = JSON.parse(data);
+          renderRecipeList();
+          updateStats();
+          if (recipes.length > 0) selectRecipe(recipes[0]);
+        }
+      } catch (e) {
+        console.warn('LocalStorage load failed:', e);
+      }
+    }
+
+    // 渲染菜谱列表
+    function renderRecipeList() {
+      const grid = document.getElementById('recipeGrid');
+      document.getElementById('recipeCount').textContent = `${recipes.length} 个菜谱`;
+
+      if (recipes.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div>暂无菜谱数据</div></div>';
+        return;
+      }
+
+      grid.innerHTML = recipes.map(recipe => {
+        const issues = analyzeRecipe(recipe);
+        const statusClass = issues.errors.length > 0 ? 'status-error' : (issues.warnings.length > 0 ? 'status-warning' : 'status-normal');
+        const statusText = issues.errors.length > 0 ? '异常' : (issues.warnings.length > 0 ? '警告' : '正常');
+        
+        return `
+          <div class="recipe-card ${selectedRecipe && selectedRecipe.id === recipe.id ? 'active' : ''}" onclick="selectRecipeById(${recipe.id})">
+            <div class="recipe-card-header">
+              <img class="recipe-card-img" src="${recipe.picture || ''}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22><rect fill=%22%23f0f0f0%22 width=%2280%22 height=%2280%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22>🍳</text></svg>'">
+              <div class="recipe-card-info">
+                <div class="recipe-card-name">${recipe.name}</div>
+                <div class="recipe-card-id">ID: ${recipe.id}</div>
+                <div class="recipe-card-meta">
+                  <span>⏱️ ${recipe.cooking_time || 0}s</span>
+                  <span>⚡ ${recipe.max_power || 0}W</span>
+                </div>
+              </div>
+            </div>
+            <span class="status-badge ${statusClass}">${statusText}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 分析菜谱问题
+    function analyzeRecipe(recipe) {
+      const warnings = [], errors = [];
+      const steps = recipe.cook_steps || [];
+      const stepSignatures = new Map();
+      steps.forEach(step => {
+        const sig = `${step.time}-${step.type}-${step.commands}`;
+        if (stepSignatures.has(sig)) warnings.push(`步骤重复：${step.commands} (${step.time}s)`);
+        stepSignatures.set(sig, true);
+      });
+      return { warnings, errors };
+    }
+
+    // 更新统计
+    function updateStats() {
+      document.getElementById('statsBar').style.display = 'flex';
+      document.getElementById('statTotal').textContent = recipes.length;
+      let normal = 0, warning = 0, error = 0;
+      recipes.forEach(r => {
+        const issues = analyzeRecipe(r);
+        if (issues.errors.length > 0) error++;
+        else if (issues.warnings.length > 0) warning++;
+        else normal++;
+      });
+      document.getElementById('statNormal').textContent = normal;
+      document.getElementById('statWarning').textContent = warning;
+      document.getElementById('statError').textContent = error;
+    }
+
+    // 选择菜谱
+    function selectRecipe(recipe) {
+      selectedRecipe = recipe;
+      selectedStep = null;
+      document.getElementById('timelineRecipeName').textContent = recipe.name;
+      renderTimeline(recipe);
+      renderRecipeList();
+    }
+
+    function selectRecipeById(id) {
+      const recipe = recipes.find(r => r.id === id);
+      if (recipe) selectRecipe(recipe);
+    }
+
+    // 渲染时间轴
+    function renderTimeline(recipe) {
+      const timeline = document.getElementById('timeline');
+      const steps = (recipe.cook_steps || []).sort((a, b) => a.time - b.time);
+      const totalTime = recipe.cooking_time || Math.max(...steps.map(s => s.time), 1);
+
+      let html = '<div class="timeline-axis"></div>';
+      const markerCount = Math.min(10, Math.ceil(totalTime / 30));
+      const markerInterval = Math.ceil(totalTime / markerCount);
+      for (let i = 0; i <= markerCount; i++) {
+        const time = Math.min(i * markerInterval, totalTime);
+        const percent = (time / totalTime) * 100;
+        html += `<div class="timeline-time-marker" style="top: ${percent}%">${time}s</div>`;
+      }
+
+      steps.forEach((step, index) => {
+        const typeClass = step.type === 3 ? 'device' : (step.type === 1 ? 'manual' : 'auto');
+        const typeText = step.type === 3 ? '设备控制' : (step.type === 1 ? '手动投料' : '自动投料');
+        const powerText = step.power ? ` | ${step.power}W` : '';
+        html += `
+          <div class="timeline-event" onclick="selectStep(${index}, event)">
+            <div class="timeline-event-dot ${typeClass}"></div>
+            <div class="timeline-event-card ${typeClass} ${selectedStep === index ? 'selected' : ''}">
+              <div class="timeline-event-time">${step.time}s · ${typeText}</div>
+              <div class="timeline-event-command">${step.commands}</div>
+              <div class="timeline-event-detail">${powerText}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      timeline.innerHTML = html;
+    }
+
+    // 选择步骤
+    function selectStep(index, event) {
+      event.stopPropagation();
+      selectedStep = index;
+      const recipe = selectedRecipe;
+      const steps = (recipe.cook_steps || []).sort((a, b) => a.time - b.time);
+      const step = steps[index];
+      
+      document.querySelectorAll('.timeline-event-card').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
+      });
+
+      const ingredients = (recipe.cooking_ingredient || []).filter(ing => ing.cookingId === step.id);
+      
+      document.getElementById('detailPanel').style.display = 'block';
+      document.getElementById('detailContent').innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">时间点</div><div class="detail-item-value">${step.time}秒</div></div>
+          <div class="detail-item"><div class="detail-item-label">步骤类型</div><div class="detail-item-value">${step.type === 3 ? '设备控制' : (step.type === 1 ? '手动投料' : '自动投料')}</div></div>
+          <div class="detail-item"><div class="detail-item-label">执行方式</div><div class="detail-item-value">${step.automatic === '1' ? '🤖 自动' : '👤 手动'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">功率</div><div class="detail-item-value">${step.power ? step.power + 'W' : '-'}</div></div>
+          <div class="detail-item detail-full"><div class="detail-item-label">指令</div><div class="detail-item-value">${step.commands}</div></div>
+        </div>
+        ${ingredients.length > 0 ? `
+          <h3 style="margin-top: 20px;">🥘 投料明细</h3>
+          <table class="ingredients-table">
+            <thead><tr><th>物料编码</th><th>剂量</th><th>单位</th></tr></thead>
+            <tbody>${ingredients.map(ing => `<tr><td>${ing.ingredientsId}</td><td>${ing.ingredientsDosage}</td><td>${ing.ingredientsUnit}</td></tr>`).join('')}</tbody>
+          </table>
+        ` : ''}
+      `;
+    }
+
+    // 文件上传
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          recipes = Array.isArray(data) ? data : [data];
+          saveToLocalStorage();
+          renderRecipeList();
+          updateStats();
+          alert(`成功导入 ${recipes.length} 个菜谱！`);
+        } catch (err) {
+          alert('文件格式错误');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    // 加载示例数据
+    function loadSampleData() {
+      loadRecipesFromData();
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('Initializing...');
+      const loaded = await loadRecipesFromData();
+      if (!loaded) {
+        loadFromLocalStorage();
+      }
+      if (recipes.length === 0) {
+        document.getElementById('recipeGrid').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div>暂无数据，请点击"导入菜谱数据"</div></div>';
+      }
+    });
+  </script>
+</body>
+</html>

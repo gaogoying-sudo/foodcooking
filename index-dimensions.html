@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>菜谱维度分析系统 - Recipe Dimension Analyzer</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --primary:#667eea;
+      --secondary:#764ba2;
+      --success:#28a745;
+      --warning:#ffc107;
+      --danger:#dc3545;
+      --info:#17a2b8;
+      --dark:#1a1a2e;
+      --light:#f8f9fa;
+    }
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+    .container{max-width:1600px;margin:0 auto}
+    
+    /* Header */
+    .header{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+    h1{color:var(--dark);font-size:28px;margin-bottom:8px}
+    .subtitle{color:#666;font-size:14px}
+    
+    /* Tabs */
+    .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+    .tab{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;background:#f0f0f0;color:#666;transition:all 0.2s}
+    .tab:hover{background:#e0e0e0}
+    .tab.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+    .tab .badge{background:var(--danger);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:8px}
+    
+    /* Content */
+    .tab-content{display:none;background:#fff;border-radius:12px;padding:24px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+    .tab-content.active{display:block}
+    
+    /* Grid */
+    .grid{display:grid;gap:20px}
+    .grid-2{grid-template-columns:repeat(2,1fr)}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+    @media(max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+    
+    /* Cards */
+    .card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary);transition:all 0.2s}
+    .card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    .card h3{font-size:16px;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .card .icon{font-size:20px}
+    .card-content{font-size:14px;color:#666;line-height:1.6}
+    .tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;margin:4px;background:#e0e0e0;color:#666}
+    .tag.primary{background:rgba(102,126,234,0.1);color:var(--primary)}
+    .tag.success{background:rgba(40,167,69,0.1);color:var(--success)}
+    .tag.warning{background:rgba(255,193,7,0.1);color:var(--warning)}
+    .tag.danger{background:rgba(220,53,69,0.1);color:var(--danger)}
+    
+    /* Dimension Tree */
+    .tree{margin-left:20px}
+    .tree-item{margin:8px 0;padding:12px;background:#fff;border-radius:8px;border-left:3px solid var(--primary)}
+    .tree-item-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+    .tree-item-title{font-weight:600;color:var(--dark)}
+    .tree-item-count{background:var(--primary);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px}
+    .tree-item-children{margin-top:12px;margin-left:20px;display:none}
+    .tree-item.active .tree-item-children{display:block}
+    .tree-item-children .tree-item{border-left-color:var(--secondary)}
+    
+    /* Stats */
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
+    .stat{background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:12px;padding:20px;color:#fff}
+    .stat-value{font-size:32px;font-weight:700;margin-bottom:8px}
+    .stat-label{font-size:14px;opacity:0.9}
+    
+    /* Mapping */
+    .mapping{display:flex;gap:20px;align-items:center}
+    .mapping-side{flex:1;background:#f8f9fa;border-radius:12px;padding:20px}
+    .mapping-arrow{font-size:40px;color:var(--primary)}
+    
+    /* Recipe Card */
+    .recipe-card{border:2px solid #e0e0e0;border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s}
+    .recipe-card:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    .recipe-card.active{border-color:var(--primary);background:linear-gradient(135deg,rgba(102,126,234,0.05),rgba(118,75,162,0.05))}
+    .recipe-header{display:flex;gap:12px;margin-bottom:12px}
+    .recipe-img{width:80px;height:80px;border-radius:8px;object-fit:cover;background:#f0f0f0}
+    .recipe-info{flex:1}
+    .recipe-name{font-size:16px;font-weight:600;color:var(--dark);margin-bottom:4px}
+    .recipe-meta{display:flex;gap:12px;font-size:12px;color:#666;margin-bottom:8px}
+    .recipe-tags{display:flex;flex-wrap:wrap;gap:4px}
+    
+    /* Progress */
+    .progress{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden;margin-top:8px}
+    .progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));transition:width 0.3s}
+    
+    /* Buttons */
+    .btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:all 0.2s}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(102,126,234,0.4)}
+    .btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+    .btn-outline:hover{background:var(--primary);color:#fff}
+    
+    /* Table */
+    .table{width:100%;border-collapse:collapse;margin-top:16px}
+    .table th,.table td{padding:12px;text-align:left;border-bottom:1px solid #e0e0e0;font-size:13px}
+    .table th{background:#f8f9fa;font-weight:600;color:#666}
+    .table tr:hover{background:#f8f9fa}
+    
+    /* Search */
+    .search-box{display:flex;gap:12px;margin-bottom:20px}
+    .search-input{flex:1;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
+    .search-input:focus{outline:none;border-color:var(--primary)}
+    
+    /* Timeline */
+    .timeline{position:relative;padding-left:40px;margin:20px 0}
+    .timeline-item{position:relative;margin-bottom:20px;padding:16px;background:#f8f9fa;border-radius:8px;border-left:4px solid var(--primary)}
+    .timeline-time{position:absolute;left:-52px;top:16px;font-size:12px;color:#999;font-weight:600}
+    .timeline-content{font-size:14px;color:#666}
+    
+    /* Radar Chart Placeholder */
+    .radar{width:300px;height:300px;margin:20px auto;background:#f8f9fa;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🍳 菜谱维度分析系统</h1>
+      <p class="subtitle">需求端 ←→ 交付端 匹配关系可视化 · 控制变量提炼</p>
+      <div style="margin-top:16px;display:flex;gap:12px">
+        <button class="btn btn-primary" onclick="location.reload()">🔄 刷新数据</button>
+        <button class="btn btn-outline" onclick="exportReport()">📊 导出报告</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('overview')">📊 总览</button>
+      <button class="tab" onclick="switchTab('demand')">🎯 需求端维度</button>
+      <button class="tab" onclick="switchTab('delivery')">⚙️ 交付端维度</button>
+      <button class="tab" onclick="switchTab('mapping')">🔗 映射关系</button>
+      <button class="tab" onclick="switchTab('recipes')">📋 菜谱库</button>
+      <button class="tab" onclick="switchTab('analysis')">🔍 分析洞察</button>
+    </div>
+
+    <!-- Tab 1: Overview -->
+    <div id="overview" class="tab-content active">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="totalRecipes">5</div>
+          <div class="stat-label">总菜谱数</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">6</div>
+          <div class="stat-label">需求端维度</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">3</div>
+          <div class="stat-label">交付端维度</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">24</div>
+          <div class="stat-label">子维度</div>
+        </div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h3><span class="icon">🎯</span> 需求端维度体系</h3>
+          <div class="card-content">
+            <div class="tag primary">场景维度</div>
+            <div class="tag primary">商业维度</div>
+            <div class="tag primary">体验维度</div>
+            <div class="tag primary">地域维度</div>
+            <div class="tag primary">复杂度</div>
+            <div class="tag primary">健康合规</div>
+            <div class="progress" style="margin-top:16px">
+              <div class="progress-bar" style="width:100%"></div>
+            </div>
+            <p style="margin-top:12px;font-size:13px;color:#666">6 大维度 · 24 个子维度 · 100+ 标签</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3><span class="icon">⚙️</span> 交付端维度体系</h3>
+          <div class="card-content">
+            <div class="tag success">设备控制</div>
+            <div class="tag success">投料控制</div>
+            <div class="tag success">生产约束</div>
+            <div class="progress" style="margin-top:16px">
+              <div class="progress-bar" style="width:100%;background:linear-gradient(90deg,#28a745,#20c997)"></div>
+            </div>
+            <p style="margin-top:12px;font-size:13px;color:#666">3 大维度 · 15 个可控变量</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <h3 style="margin-bottom:16px;color:var(--dark)">📈 维度覆盖度分析</h3>
+        <table class="table">
+          <thead>
+            <tr><th>维度</th><th>已标记菜谱</th><th>覆盖率</th><th>状态</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>场景维度</td><td>5/5</td><td>100%</td><td><span class="tag success">完成</span></td></tr>
+            <tr><td>商业维度</td><td>3/5</td><td>60%</td><td><span class="tag warning">部分</span></td></tr>
+            <tr><td>体验维度</td><td>5/5</td><td>100%</td><td><span class="tag success">完成</span></td></tr>
+            <tr><td>地域维度</td><td>5/5</td><td>100%</td><td><span class="tag success">完成</span></td></tr>
+            <tr><td>复杂度</td><td>5/5</td><td>100%</td><td><span class="tag success">完成</span></td></tr>
+            <tr><td>健康合规</td><td>0/5</td><td>0%</td><td><span class="tag danger">待补充</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: Demand Dimensions -->
+    <div id="demand" class="tab-content">
+      <h2 style="margin-bottom:20px;color:var(--dark)">🎯 需求端维度网络</h2>
+      <div class="grid grid-3">
+        <!-- 场景维度 -->
+        <div class="card">
+          <h3><span class="icon">🏢</span> 1. 场景维度</h3>
+          <div class="tree">
+            <div class="tree-item active">
+              <div class="tree-item-header">
+                <span class="tree-item-title">1.1 用餐时段</span>
+                <span class="tree-item-count">5 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">早餐</div>
+                <div class="tag">午餐</div>
+                <div class="tag">晚餐</div>
+                <div class="tag">宵夜</div>
+                <div class="tag">全天候</div>
+              </div>
+            </div>
+            <div class="tree-item active">
+              <div class="tree-item-header">
+                <span class="tree-item-title">1.2 场地业态</span>
+                <span class="tree-item-count">8 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">正餐餐厅</div>
+                <div class="tag">快餐/简餐</div>
+                <div class="tag">酒店宴会</div>
+                <div class="tag">机场/高铁</div>
+                <div class="tag">团餐/食堂</div>
+                <div class="tag">外卖档口</div>
+                <div class="tag">景区/会展</div>
+                <div class="tag">连锁门店</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">1.3 用餐方式</span>
+                <span class="tree-item-count">4 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">堂食</div>
+                <div class="tag">外卖</div>
+                <div class="tag">自取</div>
+                <div class="tag">宴会桌餐</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">1.4 运营约束</span>
+                <span class="tree-item-count">6 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">出餐时效&lt;3min</div>
+                <div class="tag">出餐时效 3-6min</div>
+                <div class="tag">峰值压力高</div>
+                <div class="tag">人力结构精简</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 商业维度 -->
+        <div class="card">
+          <h3><span class="icon">💰</span> 2. 商业维度</h3>
+          <div class="tree">
+            <div class="tree-item active">
+              <div class="tree-item-header">
+                <span class="tree-item-title">2.1 价格带</span>
+                <span class="tree-item-count">5 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">平价</div>
+                <div class="tag">中端</div>
+                <div class="tag">精品</div>
+                <div class="tag">高端</div>
+                <div class="tag">促销引流款</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">2.2 成本结构</span>
+                <span class="tree-item-count">4 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">原料成本低</div>
+                <div class="tag">原料成本中</div>
+                <div class="tag">原料成本高</div>
+                <div class="tag">SKU 数量≤5</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">2.3 份量规格</span>
+                <span class="tree-item-count">4 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">单人份</div>
+                <div class="tag">双人份</div>
+                <div class="tag">家庭份</div>
+                <div class="tag">宴会份</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 体验维度 -->
+        <div class="card">
+          <h3><span class="icon">🌶️</span> 3. 体验维度</h3>
+          <div class="tree">
+            <div class="tree-item active">
+              <div class="tree-item-header">
+                <span class="tree-item-title">3.1 味型</span>
+                <span class="tree-item-count">12 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">咸鲜</div>
+                <div class="tag">麻辣</div>
+                <div class="tag">香辣</div>
+                <div class="tag">酸辣</div>
+                <div class="tag">酸甜</div>
+                <div class="tag">甜口</div>
+                <div class="tag">蒜香</div>
+                <div class="tag">葱香</div>
+                <div class="tag">咖喱</div>
+                <div class="tag">黑椒</div>
+                <div class="tag">清淡</div>
+                <div class="tag">原汁</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">3.2 口感/质构</span>
+                <span class="tree-item-count">7 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">脆</div>
+                <div class="tag">嫩</div>
+                <div class="tag">糯</div>
+                <div class="tag">软烂</div>
+                <div class="tag">爽滑</div>
+                <div class="tag">干香</div>
+                <div class="tag">多汁</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">3.3 饱腹感</span>
+                <span class="tree-item-count">3 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">短饱 (轻食)</div>
+                <div class="tag">中饱 (热菜)</div>
+                <div class="tag">长饱 (主食)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 地域维度 -->
+        <div class="card">
+          <h3><span class="icon">🗺️</span> 4. 地域维度</h3>
+          <div class="tree">
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">4.1 国家/菜系</span>
+                <span class="tree-item-count">6 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">中餐 - 川菜</div>
+                <div class="tag">中餐 - 湘菜</div>
+                <div class="tag">中餐 - 粤菜</div>
+                <div class="tag">中餐 - 鲁菜</div>
+                <div class="tag">日韩</div>
+                <div class="tag">东南亚</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">4.2 中国区域</span>
+                <span class="tree-item-count">7 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">东北</div>
+                <div class="tag">华北</div>
+                <div class="tag">华东</div>
+                <div class="tag">华中</div>
+                <div class="tag">华南</div>
+                <div class="tag">西南</div>
+                <div class="tag">西北</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 复杂度 -->
+        <div class="card">
+          <h3><span class="icon">📐</span> 5. 复杂度维度</h3>
+          <div class="tree">
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">5.1 工艺复杂度</span>
+                <span class="tree-item-count">4 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">步骤数≤5</div>
+                <div class="tag">步骤数 6-10</div>
+                <div class="tag">功率切换≤2</div>
+                <div class="tag">需预处理</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">5.2 生产复杂度</span>
+                <span class="tree-item-count">4 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">人工投料≤3 次</div>
+                <div class="tag">自动投料≥70%</div>
+                <div class="tag">并发投料点</div>
+                <div class="tag">关键易错动作</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 健康合规 -->
+        <div class="card">
+          <h3><span class="icon">🏥</span> 6. 健康合规</h3>
+          <div class="tree">
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">6.1 过敏原</span>
+                <span class="tree-item-count">5 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">花生</div>
+                <div class="tag">坚果</div>
+                <div class="tag">海鲜</div>
+                <div class="tag">蛋奶</div>
+                <div class="tag">麸质</div>
+              </div>
+            </div>
+            <div class="tree-item">
+              <div class="tree-item-header">
+                <span class="tree-item-title">6.2 特殊饮食</span>
+                <span class="tree-item-count">4 标签</span>
+              </div>
+              <div class="tree-item-children">
+                <div class="tag">清真</div>
+                <div class="tag">素食</div>
+                <div class="tag">低盐</div>
+                <div class="tag">低脂</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Delivery Dimensions -->
+    <div id="delivery" class="tab-content">
+      <h2 style="margin-bottom:20px;color:var(--dark)">⚙️ 交付端维度体系</h2>
+      <div class="grid grid-3">
+        <!-- 设备控制 -->
+        <div class="card" style="border-left-color:var(--success)">
+          <h3><span class="icon">🔥</span> 1. 设备控制变量</h3>
+          <div class="card-content" style="margin-top:12px">
+            <div class="tag success">功率曲线</div>
+            <div class="tag success">搅拌策略</div>
+            <div class="tag success">总时长</div>
+            <div class="tag success">温度曲线</div>
+            <div class="tag success">关键时间点</div>
+            
+            <div style="margin-top:16px;padding:12px;background:#fff;border-radius:8px">
+              <h4 style="font-size:13px;color:var(--dark);margin-bottom:8px">📊 功率曲线示例</h4>
+              <div style="display:flex;align-items:flex-end;gap:4px;height:60px">
+                <div style="flex:1;background:var(--primary);height:100%;border-radius:4px 4px 0 0"></div>
+                <div style="flex:1;background:var(--secondary);height:60%;border-radius:4px 4px 0 0"></div>
+                <div style="flex:1;background:var(--primary);height:75%;border-radius:4px 4px 0 0"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#999;margin-top:4px">
+                <span>0s</span>
+                <span>30s</span>
+                <span>155s</span>
+              </div>
+              <p style="font-size:12px;color:#666;margin-top:8px">8000W → 5000W → 6000W</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 投料控制 -->
+        <div class="card" style="border-left-color:var(--success)">
+          <h3><span class="icon">🥘</span> 2. 投料控制变量</h3>
+          <div class="card-content" style="margin-top:12px">
+            <div class="tag success">自动投料物料</div>
+            <div class="tag success">自动投料剂量</div>
+            <div class="tag success">手动投料节点</div>
+            <div class="tag success">调料体系旋钮</div>
+            
+            <div style="margin-top:16px">
+              <h4 style="font-size:13px;color:var(--dark);margin-bottom:8px">🧂 可调旋钮</h4>
+              <div class="tag">咸度</div>
+              <div class="tag">甜度</div>
+              <div class="tag">辣度</div>
+              <div class="tag">麻度</div>
+              <div class="tag">酸度</div>
+              <div class="tag">油量</div>
+              <div class="tag">酱香</div>
+              <div class="tag">嫩度</div>
+              <div class="tag">收汁</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 生产约束 -->
+        <div class="card" style="border-left-color:var(--success)">
+          <h3><span class="icon">⏱️</span> 3. 生产约束变量</h3>
+          <div class="card-content" style="margin-top:12px">
+            <div class="tag success">人工参与度</div>
+            <div class="tag success">自动化程度</div>
+            <div class="tag success">步骤复杂度</div>
+            <div class="tag success">出餐节拍</div>
+            
+            <div style="margin-top:16px;padding:12px;background:#fff;border-radius:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span style="font-size:13px;color:#666">自动化程度</span>
+                <span style="font-size:13px;font-weight:600;color:var(--success)">65%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width:65%;background:linear-gradient(90deg,#28a745,#20c997)"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:12px;margin-bottom:8px">
+                <span style="font-size:13px;color:#666">人工投料点</span>
+                <span style="font-size:13px;font-weight:600;color:var(--warning)">5 次</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width:50%;background:linear-gradient(90deg,#ffc107,#fd7e14)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <h3 style="margin-bottom:16px;color:var(--dark)">📋 可控变量清单</h3>
+        <table class="table">
+          <thead>
+            <tr><th>变量类型</th><th>变量名称</th><th>可调范围</th><th>影响维度</th><th>状态</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>设备控制</td><td>功率曲线</td><td>0-12000W</td><td>锅气/嫩度/收汁</td><td><span class="tag success">可用</span></td></tr>
+            <tr><td>设备控制</td><td>搅拌速度</td><td>1-5 档</td><td>均匀度/口感</td><td><span class="tag success">可用</span></td></tr>
+            <tr><td>投料控制</td><td>盐剂量</td><td>0-10g</td><td>咸度</td><td><span class="tag success">可用</span></td></tr>
+            <tr><td>投料控制</td><td>辣椒剂量</td><td>0-50g</td><td>辣度</td><td><span class="tag success">可用</span></td></tr>
+            <tr><td>投料控制</td><td>糖剂量</td><td>0-20g</td><td>甜度</td><td><span class="tag success">可用</span></td></tr>
+            <tr><td>生产约束</td><td>出餐时长</td><td>0-30min</td><td>时效要求</td><td><span class="tag success">可用</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 4: Mapping -->
+    <div id="mapping" class="tab-content">
+      <h2 style="margin-bottom:20px;color:var(--dark)">🔗 需求端 ←→ 交付端 映射关系</h2>
+      
+      <div class="mapping" style="margin-bottom:20px">
+        <div class="mapping-side">
+          <h3 style="margin-bottom:16px">🎯 需求端输入</h3>
+          <div class="tag primary">场景：午餐/快餐</div>
+          <div class="tag primary">体验：香辣/锅气强/干香</div>
+          <div class="tag primary">商业：平价/3 分钟出餐</div>
+          <div class="tag primary">份量：单人份</div>
+        </div>
+        <div class="mapping-arrow">→</div>
+        <div class="mapping-side" style="background:linear-gradient(135deg,rgba(40,167,69,0.1),rgba(32,201,151,0.1));border:2px solid var(--success)">
+          <h3 style="margin-bottom:16px">⚙️ 交付端输出</h3>
+          <div class="tag success">功率：8000W 爆香→5000W 炒制</div>
+          <div class="tag success">辣椒：20g (辣度 3 级)</div>
+          <div class="tag success">总时长：175s</div>
+          <div class="tag success">自动化：65%</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <h3 style="margin-bottom:16px;color:var(--dark)">📊 映射规则示例</h3>
+        <table class="table">
+          <thead>
+            <tr><th>需求维度</th><th>需求值</th><th>映射的交付变量</th><th>控制逻辑</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>体验 - 辣度</td><td>辣度↑</td><td>辣椒类投料剂量↑</td><td>辣椒 20g→30g→40g</td></tr>
+            <tr><td>体验 - 锅气</td><td>锅气强</td><td>高功率爆香段</td><td>初始 8000W，持续 30s</td></tr>
+            <tr><td>体验 - 嫩度</td><td>更嫩</td><td>下肉时机后移 + 功率降低</td><td>t=128s，功率 5000W</td></tr>
+            <tr><td>体验 - 干湿度</td><td>更干/收汁</td><td>末段功率 + 时间调整</td><td>末段 6000W，延长 20s</td></tr>
+            <tr><td>商业 - 出餐时效</td><td>&lt;3min</td><td>总时长控制</td><td>选择≤180s 的菜谱</td></tr>
+            <tr><td>场景 - 份量</td><td>双人份</td><td>配料剂量×2</td><td>所有投料×2 倍</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:20px;padding:20px;background:#f8f9fa;border-radius:12px">
+        <h3 style="margin-bottom:16px;color:var(--dark)">💡 控制变量提炼逻辑</h3>
+        <div class="grid grid-3">
+          <div style="padding:16px;background:#fff;border-radius:8px">
+            <h4 style="font-size:14px;color:var(--dark);margin-bottom:8px">🔍 步骤 1: 特征提取</h4>
+            <p style="font-size:13px;color:#666;line-height:1.6">从 cook_steps 提取功率曲线、投料时间点、步骤数等特征</p>
+          </div>
+          <div style="padding:16px;background:#fff;border-radius:8px">
+            <h4 style="font-size:14px;color:var(--dark);margin-bottom:8px">🔗 步骤 2: 关系挖掘</h4>
+            <p style="font-size:13px;color:#666;line-height:1.6">分析需求标签与交付特征的相关性，找出强关联</p>
+          </div>
+          <div style="padding:16px;background:#fff;border-radius:8px">
+            <h4 style="font-size:14px;color:var(--dark);margin-bottom:8px">📐 步骤 3: 规则提炼</h4>
+            <p style="font-size:13px;color:#666;line-height:1.6">将强关联转化为可调规则，形成"旋钮"映射</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 5: Recipes -->
+    <div id="recipes" class="tab-content">
+      <h2 style="margin-bottom:20px;color:var(--dark)">📋 菜谱库</h2>
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜索菜谱名称、ID、标签..." onkeyup="filterRecipes(this.value)">
+        <button class="btn btn-primary">🔍 搜索</button>
+      </div>
+      <div class="grid grid-3" id="recipeGrid"></div>
+    </div>
+
+    <!-- Tab 6: Analysis -->
+    <div id="analysis" class="tab-content">
+      <h2 style="margin-bottom:20px;color:var(--dark)">🔍 分析洞察</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3><span class="icon">📊</span> 菜谱聚类分析</h3>
+          <div class="radar">
+            <div style="text-align:center">
+              <div style="font-size:40px;margin-bottom:8px">🎯</div>
+              <div style="font-size:14px;color:#666">聚类可视化</div>
+              <div style="font-size:12px;color:#999;margin-top:8px">(后续实现)</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3><span class="icon">🌡️</span> 功率曲线对比</h3>
+          <div class="radar">
+            <div style="text-align:center">
+              <div style="font-size:40px;margin-bottom:8px">📈</div>
+              <div style="font-size:14px;color:#666">曲线对比</div>
+              <div style="font-size:12px;color:#999;margin-top:8px">(后续实现)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top:20px">
+        <h3 style="margin-bottom:16px;color:var(--dark)">💡 智能洞察</h3>
+        <div class="grid grid-3">
+          <div style="padding:16px;background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));border-radius:12px;border-left:4px solid var(--primary)">
+            <h4 style="font-size:14px;color:var(--dark);margin-bottom:8px">🎯 发现 1: 辣味菜谱的功率模式</h4>
+            <p style="font-size:13px;color:#666;line-height:1.6">辣味菜谱普遍采用"高 - 中 - 高"功率曲线，初始 8000W 爆香辣椒，中段 5000W 炒制，末段 6000W 收汁</p>
+          </div>
+          <div style="padding:16px;background:linear-gradient(135deg,rgba(40,167,69,0.1),rgba(32,201,151,0.1));border-radius:12px;border-left:4px solid var(--success)">
+            <h4 style="font-size:14px;color:var(--dark);margin-bottom:8px">⏱️ 发现 2: 快速出餐的关键变量</h4>
+            <p style="font-size:13px;color:#666;line-height:1.6">出餐&lt;3min 的菜谱自动化投料覆盖率≥60%，人工投料点≤5 次</p>
+          </div>
+          <div style="padding:16px;background:linear-gradient(135deg,rgba(255,193,7,0.1),rgba(253,126,20,0.1));border-radius:12px;border-left:4px solid var(--warning)">
+            <h4 style="font-size:14px;color:var(--dark);margin-bottom:8px">🔧 发现 3: 可复用的控制变量</h4>
+            <p style="font-size:13px;color:#666;line-height:1.6">提炼出 9 个通用旋钮：咸度/甜度/辣度/麻度/酸度/油量/酱香/嫩度/收汁</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Recipe Data
+    const RECIPES = [
+      {id:138,name:"辣椒炒肉",time:175,power:12000,tags:["香辣","咸鲜","中饱","单人份","川菜","西南","工艺简单"],automation:65},
+      {id:139,name:"辣椒炒肉 (加糖版)",time:175,power:12000,tags:["香辣","咸鲜","微甜","中饱","单人份","川菜"],automation:65},
+      {id:141,name:"辣椒炒肉 (大份)",time:215,power:12000,tags:["香辣","咸鲜","长饱","家庭份","川菜","西南"],automation:60},
+      {id:144,name:"辣椒炒肉大份加豆豉版",time:215,power:12000,tags:["香辣","咸鲜","豉香","长饱","家庭份","川菜"],automation:60},
+      {id:149,name:"辣椒炒肉加豆豉版",time:175,power:12000,tags:["香辣","咸鲜","豉香","中饱","单人份","川菜"],automation:65}
+    ];
+
+    // Tab Switch
+    function switchTab(id) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Tree Toggle
+    document.querySelectorAll('.tree-item-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+      });
+    });
+
+    // Render Recipes
+    function renderRecipes(filter = '') {
+      const grid = document.getElementById('recipeGrid');
+      const filtered = RECIPES.filter(r => 
+        !filter || r.name.toLowerCase().includes(filter.toLowerCase()) || 
+        r.tags.some(t => t.includes(filter)) ||
+        r.id.toString().includes(filter)
+      );
+      
+      grid.innerHTML = filtered.map(r => `
+        <div class="recipe-card" onclick="selectRecipe(${r.id})">
+          <div class="recipe-header">
+            <img class="recipe-img" src="https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg" onerror="this.style.background='#f0f0f0'">
+            <div class="recipe-info">
+              <div class="recipe-name">${r.name}</div>
+              <div class="recipe-meta">
+                <span>⏱️ ${r.time}s</span>
+                <span>⚡ ${r.power}W</span>
+              </div>
+              <div class="recipe-tags">
+                ${r.tags.slice(0,3).map(t => `<span class="tag">${t}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px">
+              <span>自动化程度</span>
+              <span>${r.automation}%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" style="width:${r.automation}%"></div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterRecipes(val) {
+      renderRecipes(val);
+    }
+
+    function selectRecipe(id) {
+      alert('菜谱详情功能开发中... ID: ' + id);
+    }
+
+    function exportReport() {
+      alert('导出报告功能开发中...');
+    }
+
+    // Init
+    window.onload = function() {
+      renderRecipes();
+      console.log('✅ Recipe Dimension Analyzer loaded!');
+    };
+  </script>
+</body>
+</html>

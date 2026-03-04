@@ -1,0 +1,17 @@
+# 大文件（GitHub 限制 100MB）
+data/recipes-excel.json
+data/processed/recipe-profiles.json
+
+# 日志文件
+logs/*.log
+
+# 临时文件
+*.tmp
+*.backup
+*.temp
+
+# Node 模块（太大，不需要）
+node_modules/
+
+# 锁定文件
+package-lock.json
