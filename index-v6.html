@@ -372,7 +372,7 @@
     function renderDimensions(){
       const container = document.getElementById('dimensionGrid');
       container.innerHTML = Object.entries(state.dimensions).map(([dim,subs])=>`
-        <div class="dimension-card"><h3>📊 ${dim}</h3><div class="dimension-tree">${Object.entries(subs).map(([sub,vals])=>`<div class="tree-item" onclick="this.classList.toggle('expanded')"><div class="tree-item-label"><span>${sub}</span><span class="tree-item-count">${vals.length}</span></div><div class="tree-children">${vals.map(v=>`<span class="tag tag-primary">${v}</span>`).join('')}</div></div>`).join('')}</div></div>
+        <div class="dimension-card"><h3>📊 ${dim}</h3><div class="dimension-tree">${Object.entries(subs).map(([sub,vals])=>`<div class="tree-item expanded" onclick="this.classList.toggle('expanded')"><div class="tree-item-label"><span>${sub}</span><span class="tree-item-count">${vals.length}</span></div><div class="tree-children">${vals.map(v=>`<span class="tag tag-primary">${v}</span>`).join('')}</div></div>`).join('')}</div></div>
       `).join('');
     }
 
