@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>智能菜谱 R&D 系统 V8 - 图片识别增强版</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545;--info:#17a2b8;--dark:#1a1a2e;--light:#f8f9fa}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+    .container{max-width:1400px;margin:0 auto}
+    .header{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);text-align:center}
+    .header h1{color:var(--dark);font-size:24px;margin-bottom:8px}
+    .header p{color:#666;font-size:14px}
+    .grid{display:grid;grid-template-columns:400px 1fr;gap:20px}
+    .card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+    .upload-area{border:3px dashed var(--primary);border-radius:12px;padding:60px 20px;text-align:center;cursor:pointer;transition:all 0.3s;background:#f8f9ff}
+    .upload-area:hover{border-color:var(--secondary);background:#f0f2ff;transform:translateY(-2px)}
+    .upload-area.dragover{border-color:var(--secondary);background:#e8ebff}
+    .upload-icon{font-size:64px;margin-bottom:16px}
+    .upload-text{font-size:16px;color:var(--primary);margin-bottom:8px;font-weight:600}
+    .upload-hint{font-size:13px;color:#999}
+    #fileInput{display:none}
+    .preview{margin-top:20px;border-radius:8px;overflow:hidden;display:none}
+    .preview img{width:100%;max-height:400px;object-fit:contain}
+    .btn{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;padding:12px 32px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600;width:100%;margin-top:20px;transition:opacity 0.2s}
+    .btn:hover{opacity:0.9}
+    .btn:disabled{background:#ccc;cursor:not-allowed}
+    .result{display:none;margin-top:20px}
+    .result h3{font-size:18px;margin-bottom:16px;color:var(--dark);display:flex;align-items:center;gap:8px}
+    .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+    .info-item{background:#f8f9fa;border-radius:8px;padding:12px}
+    .info-label{font-size:12px;color:#999;margin-bottom:4px}
+    .info-value{font-size:14px;color:#333;font-weight:600}
+    .dimension-section{margin-bottom:20px}
+    .dimension-section h4{font-size:14px;color:#666;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .dimension-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+    .dimension-tag{background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));border:1px solid var(--primary);border-radius:8px;padding:8px;text-align:center}
+    .dimension-tag .label{font-size:11px;color:#999;margin-bottom:4px}
+    .dimension-tag .value{font-size:13px;color:var(--primary);font-weight:600}
+    .ingredients-list{display:grid;gap:8px}
+    .ingredient-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#f8f9fa;border-radius:6px}
+    .ingredient-name{font-size:14px;color:#666}
+    .ingredient-dosage{font-weight:600;color:var(--primary)}
+    .loading{text-align:center;padding:40px 20px;color:#666;display:none}
+    .loading-spinner{border:4px solid #f3f3f3;border-top:4px solid var(--primary);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 16px}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .error{background:rgba(220,53,69,0.1);border:1px solid var(--danger);border-radius:8px;padding:16px;color:var(--danger);margin-top:20px;display:none}
+    .recipe-match{background:linear-gradient(135deg,rgba(40,167,69,0.1),rgba(56,249,215,0.1));border:2px solid var(--success);border-radius:12px;padding:20px;margin-top:20px}
+    .recipe-match h4{color:var(--success);margin-bottom:12px;font-size:16px}
+    .tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;margin:4px 4px 4px 0;background:#f0f0f0;color:#666}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍳 智能菜谱 R&D 系统 V8</h1>
+      <p>图片识别菜谱 · 维度分析 · 菜谱匹配</p>
+    </div>
+    
+    <div class="grid">
+      <!-- 左侧：上传区 -->
+      <div class="card">
+        <h2 style="margin-bottom:20px;font-size:18px">📷 上传图片</h2>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">点击或拖拽上传图片</div>
+          <div class="upload-hint">支持 JPG/PNG/WEBP，最大 10MB</div>
+          <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+        </div>
+        <div class="preview" id="preview">
+          <img id="previewImg" src="" alt="预览">
+        </div>
+        <button class="btn" id="recognizeBtn" onclick="recognizeDish()" disabled>🔍 开始识别菜品</button>
+        <div class="loading" id="loading">
+          <div class="loading-spinner"></div>
+          <div>正在识别菜品，请稍候...</div>
+          <div style="font-size:12px;color:#999;margin-top:8px">调用 Qwen-VL 模型，约 3-5 秒</div>
+        </div>
+        <div class="error" id="error"></div>
+      </div>
+      
+      <!-- 右侧：结果展示 -->
+      <div class="card result" id="result">
+        <h3>✅ 识别结果</h3>
+        
+        <!-- 基础信息 -->
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">菜品名称</div>
+            <div class="info-value" id="dishName">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">置信度</div>
+            <div class="info-value" id="confidence">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">菜系</div>
+            <div class="info-value" id="cuisineType">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">烹饪方式</div>
+            <div class="info-value" id="cookingMethod">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">复杂度</div>
+            <div class="info-value" id="complexity">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">匹配菜谱</div>
+            <div class="info-value" id="matchedRecipe">-</div>
+          </div>
+        </div>
+        
+        <!-- 维度评估 -->
+        <div class="dimension-section">
+          <h4>📊 维度评估</h4>
+          <div class="dimension-grid" id="dimensionsGrid">
+            <!-- 动态生成 -->
+          </div>
+        </div>
+        
+        <!-- 食材识别 -->
+        <div class="dimension-section">
+          <h4>🥬 识别食材</h4>
+          <div class="ingredients-list" id="ingredientsList">
+            <!-- 动态生成 -->
+          </div>
+        </div>
+        
+        <!-- 菜品描述 -->
+        <div class="dimension-section">
+          <h4>📝 菜品描述</h4>
+          <div style="background:#f8f9fa;border-radius:8px;padding:16px;color:#666;line-height:1.6" id="description">
+            -
+          </div>
+        </div>
+        
+        <!-- 菜谱匹配 -->
+        <div class="recipe-match" id="recipeMatch" style="display:none">
+          <h4>🎯 匹配到的菜谱</h4>
+          <div id="matchContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 配置
+    const CONFIG = {
+      apiKey: 'sk-c876ee3e50d64a72a53c8c5f09cc84fb',
+      apiUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+      model: 'qwen-vl-plus',
+      referenceRecipes: []
+    };
+
+    let selectedFile = null;
+    let imageBase64 = null;
+
+    // 加载参考菜谱
+    async function loadReferenceRecipes() {
+      try {
+        const res = await fetch('data/recipes-full.json');
+        const data = await res.json();
+        CONFIG.referenceRecipes = data.slice(0, 50);
+        console.log('加载参考菜谱:', CONFIG.referenceRecipes.length, '道');
+      } catch (e) {
+        console.error('加载菜谱失败:', e);
+        CONFIG.referenceRecipes = [
+          {id:138,name:"辣椒炒肉",cook_time:175,max_power:12000},
+          {id:139,name:"辣椒炒肉 (加糖版)",cook_time:175,max_power:12000},
+          {id:141,name:"辣椒炒肉 (大份)",cook_time:215,max_power:12000},
+          {id:144,name:"辣椒炒肉大份加豆豉版",cook_time:215,max_power:12000},
+          {id:3008,name:"辣椒炒肉",cook_time:175,max_power:12000}
+        ];
+      }
+    }
+
+    // 文件选择
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      handleFile(file);
+    }
+
+    // 处理文件
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showError('请选择图片文件');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showError('图片大小不能超过 10MB');
+        return;
+      }
+
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imageBase64 = e.target.result;
+        document.getElementById('previewImg').src = imageBase64;
+        document.getElementById('preview').style.display = 'block';
+        document.getElementById('recognizeBtn').disabled = false;
+        hideError();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 拖拽支持
+    const uploadArea = document.getElementById('uploadArea');
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      handleFile(file);
+    });
+
+    // 识别菜品
+    async function recognizeDish() {
+      if (!imageBase64) {
+        showError('请先上传图片');
+        return;
+      }
+
+      // 显示加载状态
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('recognizeBtn').disabled = true;
+      document.getElementById('result').style.display = 'none';
+      hideError();
+
+      try {
+        // 调用 Qwen API
+        const result = await callQwenAPI(imageBase64);
+        console.log('识别结果:', result);
+
+        // 展示结果
+        displayResult(result);
+
+        // 匹配菜谱
+        const match = matchRecipe(result);
+        if (match.matched) {
+          displayRecipeMatch(match);
+        }
+
+      } catch (error) {
+        console.error('识别失败:', error);
+        showError(error.message || '识别失败，请重试');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('recognizeBtn').disabled = false;
+      }
+    }
+
+    // 调用 Qwen API
+    async function callQwenAPI(imageBase64) {
+      const prompt = `你是一位专业的菜品识别专家。请分析这张图片中的菜品，并严格按照以下 JSON 格式返回结果：
+
+{
+  "dish_name": "菜品名称（中文）",
+  "confidence": 0.95,
+  "cuisine_type": "菜系（如：川菜/湘菜/粤菜/家常菜等）",
+  "cooking_method": "烹饪方式（如：炒/炖/蒸/炸/烤/红烧等）",
+  "complexity": "复杂度（简单/中等/复杂）",
+  "ingredients": ["主料 1", "主料 2", "辅料 1", "调料 1"],
+  "dimensions": {
+    "辣度": "低/中/高",
+    "咸度": "低/中/高",
+    "甜度": "低/中/高",
+    "油量": "少/中/多",
+    "锅气": "低/中/高",
+    "嫩度": "低/中/高"
+  },
+  "description": "对菜品的详细描述（色泽、质感、摆盘等，50-100 字）"
+}
+
+要求：
+1. 只返回 JSON，不要有其他文字
+2. confidence 是 0-1 之间的数字
+3. ingredients 列出能看到的主要食材（至少 3 个）
+4. dimensions 根据菜品特征合理评估`;
+
+      const payload = {
+        model: CONFIG.model,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image_url', image_url: { url: imageBase64 } },
+              { type: 'text', text: prompt }
+            ]
+          }
+        ],
+        max_tokens: 1024,
+        temperature: 0.3
+      };
+
+      const response = await fetch(CONFIG.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${CONFIG.apiKey}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`API 请求失败：${error.message || response.statusText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+
+      // 解析 JSON
+      return parseRecognitionResult(content);
+    }
+
+    // 解析识别结果
+    function parseRecognitionResult(content) {
+      let jsonStr = content.trim();
+      if (jsonStr.startsWith('```json')) {
+        jsonStr = jsonStr.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (jsonStr.startsWith('```')) {
+        jsonStr = jsonStr.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      return JSON.parse(jsonStr);
+    }
+
+    // 展示结果
+    function displayResult(result) {
+      document.getElementById('result').style.display = 'block';
+
+      // 基础信息
+      document.getElementById('dishName').textContent = result.dish_name || '未知菜品';
+      document.getElementById('confidence').textContent = `${((result.confidence || 0.8) * 100).toFixed(1)}%`;
+      document.getElementById('cuisineType').textContent = result.cuisine_type || '家常菜';
+      document.getElementById('cookingMethod').textContent = result.cooking_method || '炒';
+      document.getElementById('complexity').textContent = result.complexity || '中等';
+      document.getElementById('matchedRecipe').textContent = '识别中...';
+
+      // 维度评估
+      const dims = result.dimensions || {};
+      const dimHtml = Object.entries(dims).map(([key, value]) => `
+        <div class="dimension-tag">
+          <div class="label">${key}</div>
+          <div class="value">${value || '-'}</div>
+        </div>
+      `).join('');
+      document.getElementById('dimensionsGrid').innerHTML = dimHtml || '<div style="color:#999">暂无维度数据</div>';
+
+      // 食材识别
+      const ingredients = result.ingredients || [];
+      const ingHtml = ingredients.map(ing => `
+        <div class="ingredient-item">
+          <span class="ingredient-name">${ing}</span>
+          <span class="ingredient-dosage">适量</span>
+        </div>
+      `).join('');
+      document.getElementById('ingredientsList').innerHTML = ingHtml || '<div style="color:#999">暂无食材数据</div>';
+
+      // 菜品描述
+      document.getElementById('description').textContent = result.description || '暂无描述';
+    }
+
+    // 匹配菜谱
+    function matchRecipe(result) {
+      const dishName = result.dish_name || '';
+      const matched = CONFIG.referenceRecipes.find(r =>
+        r.name.includes(dishName) || dishName.includes(r.name)
+      );
+
+      if (matched) {
+        return {
+          matched: true,
+          recipe_id: matched.id,
+          recipe_name: matched.name,
+          confidence: 0.9,
+          cook_time: matched.cook_time,
+          max_power: matched.max_power
+        };
+      }
+
+      return { matched: false };
+    }
+
+    // 展示菜谱匹配
+    function displayRecipeMatch(match) {
+      document.getElementById('recipeMatch').style.display = 'block';
+      document.getElementById('matchContent').innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:var(--success);margin-bottom:4px">${match.recipe_name}</div>
+            <div style="font-size:13px;color:#666">匹配度：${(match.confidence * 100).toFixed(1)}%</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:13px;color:#666">⏱️ ${match.cook_time}秒</div>
+            <div style="font-size:13px;color:#666">⚡ ${match.max_power / 1000}kW</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <span class="tag">ID: ${match.recipe_id}</span>
+          <span class="tag">川菜</span>
+          <span class="tag">香辣</span>
+        </div>
+      `;
+      document.getElementById('matchedRecipe').textContent = match.recipe_name;
+    }
+
+    // 错误处理
+    function showError(msg) {
+      document.getElementById('error').textContent = msg;
+      document.getElementById('error').style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('error').style.display = 'none';
+    }
+
+    // 初始化
+    window.onload = function() {
+      loadReferenceRecipes();
+      console.log('✅ V8 图片识别增强版已加载');
+    };
+  </script>
+</body>
+</html>
