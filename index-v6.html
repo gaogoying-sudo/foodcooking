@@ -10,55 +10,37 @@
     :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545;--info:#17a2b8;--dark:#1a1a2e;--light:#f8f9fa}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
     .container{max-width:1800px;margin:0 auto}
-    
-    /* 头部 */
     .header{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center}
     .header-left h1{color:var(--dark);font-size:28px;margin-bottom:8px}
     .header-left .subtitle{color:#666;font-size:14px}
-    
-    /* 版本切换 */
     .version-select{position:relative}
     .version-btn{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
     .version-dropdown{position:absolute;top:100%;right:0;margin-top:8px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);min-width:200px;display:none;z-index:1000}
     .version-dropdown.show{display:block}
-    .version-dropdown a{display:block;padding:12px 20px;color:#333;text-decoration:none;border-bottom:1px solid #f0f0f0;transition:background 0.2s}
+    .version-dropdown a{display:block;padding:12px 20px;color:#333;text-decoration:none;border-bottom:1px solid #f0f0f0}
     .version-dropdown a:hover{background:#f8f9fa}
     .version-dropdown a:last-child{border-bottom:none;border-radius:0 0 8px 8px}
     .version-dropdown a.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
-    
-    /* 标签页 */
     .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
-    .tab{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;background:#f0f0f0;color:#666;transition:all 0.2s}
+    .tab{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;background:#f0f0f0;color:#666}
     .tab:hover{background:#e0e0e0}
     .tab.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
     .tab-content{display:none;background:#fff;border-radius:12px;padding:24px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
     .tab-content.active{display:block}
-    
-    /* 统计面板 */
     .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
     .stat{background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:12px;padding:20px;color:#fff}
     .stat-value{font-size:32px;font-weight:700;margin-bottom:8px}
     .stat-label{font-size:14px;opacity:0.9}
-    
-    /* 搜索框 */
     .search-box{display:flex;gap:12px;margin-bottom:20px}
     .search-input{flex:1;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
     .search-input:focus{outline:none;border-color:var(--primary)}
-    
-    /* 菜谱列表 */
     .recipe-list{height:500px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:8px;background:#fff}
     .recipe-item{padding:16px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:all 0.2s}
     .recipe-item:hover{background:#f8f9fa}
     .recipe-item.active{background:linear-gradient(90deg,rgba(102,126,234,0.1),transparent);border-left:3px solid var(--primary)}
-    
-    /* 瀑布流详情 */
     .waterfall-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px;margin-top:20px}
-    .waterfall-card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary);transition:transform 0.2s}
-    .waterfall-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    .waterfall-card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary)}
     .waterfall-card h3{color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;font-size:16px}
-    .waterfall-card .icon{font-size:20px}
-    
-    /* 时间轴瀑布 */
     .timeline-waterfall{position:relative;padding-left:24px}
     .timeline-waterfall::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--primary),var(--secondary))}
     .timeline-event{position:relative;margin-bottom:16px;padding:12px 16px;background:#fff;border-radius:8px;border-left:3px solid var(--primary)}
@@ -69,44 +51,28 @@
     .tag-control{background:rgba(102,126,234,0.1);color:var(--primary)}
     .tag-manual{background:rgba(255,193,7,0.1);color:var(--warning)}
     .tag-auto{background:rgba(40,167,69,0.1);color:var(--success)}
-    
-    /* 食材列表 */
     .ingredient-list{display:grid;gap:8px}
     .ingredient-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fff;border-radius:6px}
     .ingredient-name{font-size:14px;color:#666}
     .ingredient-dosage{font-weight:600;color:var(--primary)}
-    
-    /* 参数网格 */
     .params-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .param-item{background:#fff;padding:12px;border-radius:8px;text-align:center}
     .param-value{font-size:20px;font-weight:700;color:var(--primary)}
     .param-label{font-size:12px;color:#999;margin-top:4px}
-    
-    /* 标签 */
     .tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;margin:4px}
     .tag-primary{background:rgba(102,126,234,0.1);color:var(--primary)}
-    .tag-success{background:rgba(40,167,69,0.1);color:var(--success)}
-    .tag-warning{background:rgba(255,193,7,0.1);color:var(--warning)}
-    
-    /* 加载状态 */
     .loading{text-align:center;padding:60px 20px;color:#666}
     .loading-spinner{border:4px solid #f3f3f3;border-top:4px solid var(--primary);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 20px}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-    
-    /* 维度网络 */
-    .dimension-network{margin-top:20px}
     .dimension-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
     .dimension-card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary)}
     .dimension-card h3{color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-    .dimension-tree{margin-left:12px}
     .tree-item{margin:8px 0;padding:8px 12px;background:#fff;border-radius:6px;border-left:2px solid #ddd;cursor:pointer}
     .tree-item:hover{border-left-color:var(--primary);background:#f0f0f0}
-    .tree-item-label{display:flex;justify-content:space-between;align-items:center;font-size:14px}
+    .tree-item-label{display:flex;justify-content:space-between;align-items:center}
     .tree-item-count{background:#e0e0e0;color:#666;padding:2px 8px;border-radius:10px;font-size:12px}
     .tree-children{margin-left:16px;margin-top:8px;display:none}
     .tree-item.expanded .tree-children{display:block}
-    
-    /* 关闭按钮 */
     .close-btn{position:fixed;top:20px;right:20px;background:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:24px;color:#999;display:none;z-index:1000}
     .close-btn.show{display:block}
     .close-btn:hover{color:var(--danger)}
@@ -114,16 +80,13 @@
 </head>
 <body>
   <div class="container">
-    <!-- 头部 -->
     <div class="header">
       <div class="header-left">
         <h1>🍳 菜谱关系分析系统</h1>
         <p class="subtitle">需求端 ↔ 交付端 ↔ 控制变量 映射体系</p>
       </div>
       <div class="version-select">
-        <button class="version-btn" onclick="toggleVersionDropdown()">
-          📦 版本切换 <span style="font-size:12px;opacity:0.8">▼</span>
-        </button>
+        <button class="version-btn" onclick="toggleVersionDropdown()">📦 版本切换 ▼</button>
         <div class="version-dropdown" id="versionDropdown">
           <a href="index.html">V1 极速版</a>
           <a href="index-dimensions.html">V2 维度分析</a>
@@ -134,158 +97,105 @@
         </div>
       </div>
     </div>
-    
-    <!-- 标签页 -->
     <div class="tabs">
       <button class="tab active" onclick="switchTab('recipes')">📋 菜谱库</button>
       <button class="tab" onclick="switchTab('dimensions')">🎯 维度网络</button>
     </div>
-    
-    <!-- Tab 1: 菜谱库 + 瀑布流详情 -->
     <div id="recipes" class="tab-content active">
       <div class="stats">
-        <div class="stat">
-          <div class="stat-value" id="totalCount">加载中...</div>
-          <div class="stat-label">总菜谱数</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="avgTime">0s</div>
-          <div class="stat-label">平均时长</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="avgPower">0kW</div>
-          <div class="stat-label">平均功率</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="avgAutomation">0%</div>
-          <div class="stat-label">平均自动化</div>
-        </div>
+        <div class="stat"><div class="stat-value" id="totalCount">加载中...</div><div class="stat-label">总菜谱数</div></div>
+        <div class="stat"><div class="stat-value" id="avgTime">0s</div><div class="stat-label">平均时长</div></div>
+        <div class="stat"><div class="stat-value" id="avgPower">0kW</div><div class="stat-label">平均功率</div></div>
+        <div class="stat"><div class="stat-value" id="avgAutomation">0%</div><div class="stat-label">平均自动化</div></div>
       </div>
-      
       <div class="search-box">
         <input type="text" class="search-input" id="recipeSearch" placeholder="搜索菜谱名称、ID..." onkeyup="filterRecipes()">
       </div>
-      
       <div style="display:grid;grid-template-columns:280px 1fr;gap:20px">
-        <!-- 左侧菜谱列表 -->
-        <div class="recipe-list" id="recipeList">
-          <div class="loading">
-            <div class="loading-spinner"></div>
-            <div>正在加载菜谱数据...</div>
-          </div>
-        </div>
-        
-        <!-- 右侧瀑布流详情 -->
+        <div class="recipe-list" id="recipeList"><div class="loading"><div class="loading-spinner"></div><div>正在加载 13,510 条菜谱...</div></div></div>
         <div class="waterfall-container" id="waterfallContainer">
           <div style="grid-column:1/-1;text-align:center;padding:60px;color:#999">
             <div style="font-size:48px;margin-bottom:16px">👈</div>
-            <div style="font-size:16px">点击左侧菜谱查看完整烹饪过程</div>
+            <div>点击左侧菜谱查看完整烹饪过程</div>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Tab 2: 维度网络 -->
     <div id="dimensions" class="tab-content">
       <h2 style="margin-bottom:20px">🎯 需求端维度网络</h2>
-      <div class="dimension-grid" id="dimensionGrid">
-        <!-- 维度卡片将在这里生成 -->
-      </div>
+      <div class="dimension-grid" id="dimensionGrid"></div>
     </div>
   </div>
-  
   <button class="close-btn" id="closeBtn" onclick="closeDetail()">×</button>
 
   <script>
-    // ============ 状态管理 ============
     const state = {
       recipes: [],
       filtered: [],
       selected: null,
       dimensions: {
-        '场景维度': {
-          '用餐时段': ['早餐', '午餐', '晚餐', '夜宵', '全天候'],
-          '场地业态': ['正餐餐厅', '快餐简餐', '酒店宴会', '机场高铁', '团餐食堂', '外卖档口'],
-          '份量规格': ['单人份', '双人份', '家庭份', '宴会份']
-        },
-        '商业维度': {
-          '价格带': ['平价', '中端', '精品', '高端', '促销款'],
-          '出餐效率': ['快速 (<3min)', '标准 (3-6min)', '慢速 (>6min)']
-        },
-        '体验维度': {
-          '味型': ['麻辣', '香辣', '酸辣', '咸鲜', '蒜香', '酱香', '糖醋', '红烧'],
-          '口感': ['脆', '嫩', '糯', '软烂', '爽滑', '干香', '多汁'],
-          '饱腹感': ['低饱腹', '中饱腹', '高饱腹']
-        },
-        '地域维度': {
-          '菜系': ['川菜', '湘菜', '粤菜', '鲁菜', '江浙菜', '日韩', '东南亚'],
-          '区域': ['东北', '华北', '华东', '华中', '华南', '西南', '西北']
-        },
-        '复杂度维度': {
-          '步骤数': ['简单 (≤5)', '中等 (6-10)', '复杂 (>10)'],
-          '人工点': ['少 (≤3)', '中 (4-7)', '多 (>7)']
-        },
-        '健康合规': {
-          '过敏原': ['花生', '坚果', '海鲜', '蛋奶', '麸质'],
-          '特殊饮食': ['清真', '素食', '低盐', '低脂', '低糖']
-        }
+        '场景维度': {'用餐时段':['早餐','午餐','晚餐','夜宵','全天候'],'场地业态':['正餐餐厅','快餐简餐','酒店宴会','团餐食堂','外卖档口'],'份量规格':['单人份','双人份','家庭份','宴会份']},
+        '商业维度': {'价格带':['平价','中端','精品','高端'],'出餐效率':['快速 (<3min)','标准 (3-6min)','慢速 (>6min)']},
+        '体验维度': {'味型':['麻辣','香辣','酸辣','咸鲜','蒜香','酱香','糖醋','红烧'],'口感':['脆','嫩','糯','软烂','爽滑','干香','多汁'],'饱腹感':['低','中','高']},
+        '地域维度': {'菜系':['川菜','湘菜','粤菜','鲁菜','江浙菜'],'区域':['东北','华北','华东','华南','西南','西北']},
+        '复杂度维度': {'步骤数':['简单 (≤5)','中等 (6-10)','复杂 (>10)'],'人工点':['少 (≤3)','中 (4-7)','多 (>7)']},
+        '健康合规': {'过敏原':['花生','坚果','海鲜','蛋奶','麸质'],'特殊饮食':['清真','素食','低盐','低脂','低糖']}
       }
     };
-    
-    // ============ 版本切换 ============
-    function toggleVersionDropdown(){
-      document.getElementById('versionDropdown').classList.toggle('show');
-    }
-    document.addEventListener('click', function(e){
-      if(!e.target.closest('.version-select')){
-        document.getElementById('versionDropdown').classList.remove('show');
-      }
-    });
-    
-    // ============ 标签页切换 ============
+
+    function toggleVersionDropdown(){ document.getElementById('versionDropdown').classList.toggle('show'); }
+    document.addEventListener('click', e => { if(!e.target.closest('.version-select')) document.getElementById('versionDropdown').classList.remove('show'); });
     function switchTab(id){
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
       event.target.classList.add('active');
       document.getElementById(id).classList.add('active');
-      if(id === 'dimensions') renderDimensions();
+      if(id==='dimensions') renderDimensions();
     }
-    
-    // ============ 数据加载 ============
+
     async function loadRecipes(){
-      console.log('🚀 V6 开始加载数据...');
-      
+      console.log('🚀 V6 加载数据...');
       try{
-        let data;
-        try{
-          const res = await fetch('data/recipes-full.json');
-          if(res.ok) data = { recipes: await res.json() };
-        }catch(e){ console.log('小数据加载失败'); }
+        // 优先加载压缩大数据（13,510 条）
+        const res = await fetch('data/processed/recipe-profiles.json.gz');
+        const blob = await res.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        const uncompressed = pako.ungzip(arrayBuffer, {to:'string'});
+        const jsonData = JSON.parse(uncompressed);
         
-        if(!data || !data.recipes || data.recipes.length === 0){
-          console.log('加载压缩数据...');
-          const res = await fetch('data/processed/recipe-profiles.json.gz');
-          const blob = await res.blob();
-          const arrayBuffer = await blob.arrayBuffer();
-          const uncompressed = pako.ungzip(arrayBuffer, { to: 'string' });
-          const jsonData = JSON.parse(uncompressed);
-          data = { recipes: jsonData.profiles || [] };
-        }
+        console.log('📊 原始数据:', jsonData.profiles?.length || 0, '条');
         
-        console.log('📊 原始数据:', data.recipes?.length || 0, '条');
-        
-        state.recipes = (data.recipes || []).map(p => ({
-          id: p.meta?.id || p.id || 0,
-          name: p.meta?.name || p.name || '未命名',
-          time: p.meta?.cook_time || p.features?.total_time || p.cooking_time || 0,
-          power: p.meta?.max_power || p.max_power || 12000,
-          automation: p.features ? Math.round((1 - (p.features.manual_count / (p.features.step_count || 1))) * 100) : 65,
-          profile: p
-        }));
+        state.recipes = (jsonData.profiles || []).map(p => {
+          // 兼容 RecipeProfile 格式
+          if(p.meta && p.timeline){
+            return {
+              id: p.meta.id || 0,
+              name: p.meta.name || '未命名',
+              time: p.meta.cook_time || p.features?.total_time || 0,
+              power: p.meta.max_power || 12000,
+              automation: p.features ? Math.round((1-(p.features.manual_count/(p.features.step_count||1)))*100) : 65,
+              profile: p
+            };
+          }
+          // 兼容原始格式
+          return {
+            id: p.id || 0,
+            name: p.name || '未命名',
+            time: p.cooking_time || p.cook_time || 0,
+            power: p.max_power || 12000,
+            automation: 65,
+            profile: parseOriginalRecipe(p)
+          };
+        });
         
         console.log('✅ 加载完成:', state.recipes.length, '条');
       }catch(e){
         console.error('❌ 加载失败:', e);
+        state.recipes = [];
+      }
+      
+      if(state.recipes.length === 0){
+        // 降级示例数据
         state.recipes = [
           {id:138,name:"辣椒炒肉",time:175,power:12000,automation:65,profile:{}},
           {id:139,name:"辣椒炒肉 (加糖版)",time:175,power:12000,automation:65,profile:{}},
@@ -294,243 +204,178 @@
           {id:4113,name:"辣椒炒肉_Max",time:187,power:12000,automation:65,profile:{}},
           {id:4509,name:"辣椒炒肉_小份",time:187,power:12000,automation:65,profile:{}}
         ];
+        console.log('⚠️ 使用示例数据');
       }
       
       state.filtered = [...state.recipes];
       updateStats();
       renderRecipeList();
     }
-    
-    // ============ 渲染函数 ============
+
+    // 解析原始菜谱格式
+    function parseOriginalRecipe(p){
+      const controls = (p.cook_steps || []).filter(s => s.type === 3).map(s => ({
+        t: s.time || 0,
+        power: parseFloat(s.power) || 0,
+        speed: parseFloat(s.speed) || 0,
+        commands: s.commands || ''
+      }));
+      const manual_ops = (p.cook_steps || []).filter(s => s.type === 1).map(s => ({
+        t: s.time || 0,
+        text: s.commands || '',
+        automatic: false
+      }));
+      const auto_dosing = (p.cook_steps || []).filter(s => s.type === 2).map(s => ({
+        t: s.time || 0,
+        text: s.commands || '',
+        automatic: true
+      }));
+      const ingredients = (p.cooking_ingredient || []).map(i => ({
+        ingredientsId: i.ingredientsId || '',
+        total_dosage: parseFloat(i.ingredientsDosage) || 0,
+        unit: i.ingredientsUnit || '克'
+      }));
+      return {
+        meta: {
+          id: p.id,
+          name: p.name,
+          cook_time: p.cooking_time || p.cook_time,
+          max_power: p.max_power,
+          portion_size: p.portion_size || 1
+        },
+        timeline: { controls, manual_ops, auto_dosing },
+        ingredients_summary: ingredients,
+        features: {
+          total_time: p.cooking_time || 0,
+          step_count: p.cook_steps?.length || 0,
+          manual_count: manual_ops.length,
+          auto_dosing_count: auto_dosing.length,
+          power_switch_count: controls.length > 1 ? controls.filter((c,i)=>i>0 && c.power!==controls[i-1].power).length : 0
+        }
+      };
+    }
+
     function updateStats(){
       document.getElementById('totalCount').textContent = state.recipes.length.toLocaleString();
-      const avgTime = state.recipes.reduce((s,r) => s + (r.time || 0), 0) / (state.recipes.length || 1);
-      document.getElementById('avgTime').textContent = Math.round(avgTime) + 's';
-      const avgPower = state.recipes.reduce((s,r) => s + (r.power || 0), 0) / (state.recipes.length || 1);
-      document.getElementById('avgPower').textContent = (avgPower / 1000).toFixed(1) + 'kW';
-      const avgAuto = state.recipes.reduce((s,r) => s + (r.automation || 0), 0) / (state.recipes.length || 1);
-      document.getElementById('avgAutomation').textContent = Math.round(avgAuto) + '%';
+      document.getElementById('avgTime').textContent = Math.round(state.recipes.reduce((s,r)=>s+(r.time||0),0)/(state.recipes.length||1))+'s';
+      document.getElementById('avgPower').textContent = ((state.recipes.reduce((s,r)=>s+(r.power||0),0)/(state.recipes.length||1))/1000).toFixed(1)+'kW';
+      document.getElementById('avgAutomation').textContent = Math.round(state.recipes.reduce((s,r)=>s+(r.automation||0),0)/(state.recipes.length||1))+'%';
     }
-    
+
     function renderRecipeList(){
       const container = document.getElementById('recipeList');
-      if(state.filtered.length === 0){
-        container.innerHTML = '<div style="padding:60px;text-align:center;color:#999">没有找到匹配的菜谱</div>';
-        return;
-      }
-      const display = state.filtered.slice(0, 100);
-      container.innerHTML = display.map(r => `
+      if(state.filtered.length===0){ container.innerHTML='<div style="padding:60px;text-align:center;color:#999">没有找到匹配的菜谱</div>'; return; }
+      const display = state.filtered.slice(0,100);
+      container.innerHTML = display.map(r=>`
         <div class="recipe-item" onclick="selectRecipe(${r.id})">
           <div style="font-weight:600;color:var(--dark);margin-bottom:4px">${r.name}</div>
           <div style="font-size:12px;color:#666">⏱️ ${r.time}s · ⚡ ${r.power}W · 🤖 ${r.automation}%</div>
-          <div style="font-size:12px;color:var(--primary);margin-top:4px">ID: ${r.id}</div>
+          <div style="font-size:12px;color:var(--primary)">ID: ${r.id}</div>
         </div>
       `).join('');
     }
-    
+
     function filterRecipes(){
       const val = document.getElementById('recipeSearch').value.toLowerCase();
-      state.filtered = state.recipes.filter(r => r.name.toLowerCase().includes(val) || r.id.toString().includes(val));
+      state.filtered = state.recipes.filter(r=>r.name.toLowerCase().includes(val)||r.id.toString().includes(val));
       renderRecipeList();
     }
-    
+
     function selectRecipe(id){
-      state.selected = state.recipes.find(r => r.id === id);
+      state.selected = state.recipes.find(r=>r.id===id);
       if(!state.selected) return;
-      
-      document.querySelectorAll('.recipe-item').forEach((el, i) => {
-        el.classList.toggle('active', state.filtered[i]?.id === id);
-      });
-      
+      document.querySelectorAll('.recipe-item').forEach((el,i)=>{ el.classList.toggle('active',state.filtered[i]?.id===id); });
       renderWaterfall(state.selected.profile || state.selected);
       document.getElementById('closeBtn').classList.add('show');
     }
-    
+
     function closeDetail(){
       state.selected = null;
-      document.getElementById('waterfallContainer').innerHTML = `
-        <div style="grid-column:1/-1;text-align:center;padding:60px;color:#999">
-          <div style="font-size:48px;margin-bottom:16px">👈</div>
-          <div style="font-size:16px">点击左侧菜谱查看完整烹饪过程</div>
-        </div>
-      `;
+      document.getElementById('waterfallContainer').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#999"><div style="font-size:48px;margin-bottom:16px">👈</div><div>点击左侧菜谱查看完整烹饪过程</div></div>';
       document.getElementById('closeBtn').classList.remove('show');
-      document.querySelectorAll('.recipe-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.recipe-item').forEach(el=>el.classList.remove('active'));
     }
-    
-    // ============ 瀑布流详情渲染 ============
+
     function renderWaterfall(p){
       const container = document.getElementById('waterfallContainer');
-      
-      // 基础信息卡片
-      const metaCard = `
-        <div class="waterfall-card" style="border-left-color:var(--primary)">
-          <h3><span class="icon">📋</span> 基础信息</h3>
-          <div class="params-grid">
-            <div class="param-item">
-              <div class="param-value">${p.meta?.name || p.name || '未命名'}</div>
-              <div class="param-label">菜谱名称</div>
-            </div>
-            <div class="param-item">
-              <div class="param-value">${p.meta?.id || p.id || '-'}</div>
-              <div class="param-label">菜谱 ID</div>
-            </div>
-            <div class="param-item">
-              <div class="param-value">${(p.meta?.cook_time || p.cooking_time || 0)}s</div>
-              <div class="param-label">烹饪时长</div>
-            </div>
-            <div class="param-item">
-              <div class="param-value">${(p.meta?.max_power || p.max_power || 0) / 1000}kW</div>
-              <div class="param-label">最大功率</div>
-            </div>
-            <div class="param-item">
-              <div class="param-value">${p.meta?.portion_size || 1}人份</div>
-              <div class="param-label">份量规格</div>
-            </div>
-            <div class="param-item">
-              <div class="param-value">${p.features?.auto_dosing_ratio || '0'}%</div>
-              <div class="param-label">自动化率</div>
-            </div>
-          </div>
-          <div style="margin-top:16px">
-            ${['场景', '味型', '菜系', '复杂度'].map(t => `<span class="tag tag-primary">${t}</span>`).join('')}
-          </div>
-        </div>
-      `;
-      
-      // 时间轴瀑布卡片
+      const name = p.meta?.name || p.name || '未命名';
       const controls = p.timeline?.controls || [];
       const manual_ops = p.timeline?.manual_ops || [];
       const auto_dosing = p.timeline?.auto_dosing || [];
-      
+      const ingredients = p.ingredients_summary || [];
+      const features = p.features || {};
+
+      const metaCard = `
+        <div class="waterfall-card" style="border-left-color:var(--primary)">
+          <h3>📋 基础信息</h3>
+          <div class="params-grid">
+            <div class="param-item"><div class="param-value">${name}</div><div class="param-label">菜谱名称</div></div>
+            <div class="param-item"><div class="param-value">${p.meta?.id||'-'}</div><div class="param-label">菜谱 ID</div></div>
+            <div class="param-item"><div class="param-value">${p.meta?.cook_time||0}s</div><div class="param-label">烹饪时长</div></div>
+            <div class="param-item"><div class="param-value">${(p.meta?.max_power||0)/1000}kW</div><div class="param-label">最大功率</div></div>
+            <div class="param-item"><div class="param-value">${p.meta?.portion_size||1}人份</div><div class="param-label">份量</div></div>
+            <div class="param-item"><div class="param-value">${features.auto_dosing_count||0}次</div><div class="param-label">自动投料</div></div>
+          </div>
+          <div style="margin-top:16px">${['场景','味型','菜系','复杂度'].map(t=>`<span class="tag tag-primary">${t}</span>`).join('')}</div>
+        </div>
+      `;
+
+      const allEvents = [...controls.map(c=>({t:c.t||0,text:c.commands||'',type:'control'})), ...manual_ops.map(m=>({t:m.t||0,text:m.text||'',type:'manual'})), ...auto_dosing.map(a=>({t:a.t||0,text:a.text||'',type:'auto'}))].sort((a,b)=>a.t-b.t);
       const timelineCard = `
         <div class="waterfall-card" style="border-left-color:var(--warning)">
-          <h3><span class="icon">⏱️</span> 烹饪时间轴（共${controls.length + manual_ops.length + auto_dosing.length}个事件）</h3>
+          <h3>⏱️ 烹饪时间轴（共${allEvents.length}个事件）</h3>
           <div class="timeline-waterfall">
-            ${[...controls, ...manual_ops, ...auto_dosing]
-              .map(e => ({
-                t: e.t || e.time || 0,
-                text: e.commands || e.text || '',
-                type: e.type === 3 ? 'control' : e.type === 1 ? 'manual' : 'auto'
-              }))
-              .sort((a, b) => a.t - b.t)
-              .map(e => `
-                <div class="timeline-event">
-                  <div class="timeline-time">${e.t}s</div>
-                  <div class="timeline-text">${e.text}</div>
-                  <span class="timeline-tag ${e.type === 'control' ? 'tag-control' : e.type === 'manual' ? 'tag-manual' : 'tag-auto'}">
-                    ${e.type === 'control' ? '功率控制' : e.type === 'manual' ? '手动投料' : '自动投料'}
-                  </span>
-                </div>
-              `).join('')}
+            ${allEvents.map(e=>`
+              <div class="timeline-event">
+                <div class="timeline-time">${e.t}s</div>
+                <div class="timeline-text">${e.text||'无描述'}</div>
+                <span class="timeline-tag ${e.type==='control'?'tag-control':e.type==='manual'?'tag-manual':'tag-auto'}">${e.type==='control'?'功率控制':e.type==='manual'?'手动投料':'自动投料'}</span>
+              </div>
+            `).join('')}
           </div>
         </div>
       `;
-      
-      // 食材清单卡片
-      const ingredients = p.ingredients_summary || [];
+
       const ingredientsCard = `
         <div class="waterfall-card" style="border-left-color:var(--success)">
-          <h3><span class="icon">🥬</span> 食材清单（共${ingredients.length}种）</h3>
+          <h3>🥬 食材清单（共${ingredients.length}种）</h3>
           <div class="ingredient-list">
-            ${ingredients.length > 0 ? ingredients.map(ing => `
-              <div class="ingredient-item">
-                <span class="ingredient-name">${ing.ingredientsId || '未知食材'}</span>
-                <span class="ingredient-dosage">${ing.total_dosage || 0}${ing.unit || 'g'}</span>
-              </div>
-            `).join('') : '<div style="color:#999;text-align:center;padding:20px">暂无食材数据</div>'}
+            ${ingredients.length>0 ? ingredients.map(ing=>`<div class="ingredient-item"><span class="ingredient-name">${ing.ingredientsId||'未知'}</span><span class="ingredient-dosage">${ing.total_dosage||0}${ing.unit||'g'}</span></div>`).join('') : '<div style="color:#999;text-align:center;padding:20px">暂无食材数据</div>'}
           </div>
         </div>
       `;
-      
-      // 特征指标卡片
-      const features = p.features || {};
+
       const featuresCard = `
         <div class="waterfall-card" style="border-left-color:var(--info)">
-          <h3><span class="icon">📊</span> 结构化特征</h3>
+          <h3>📊 结构化特征</h3>
           <div class="params-grid" style="grid-template-columns:1fr">
-            ${Object.entries(features).filter(([k]) => !k.includes('ratio')).map(([k, v]) => `
-              <div class="ingredient-item">
-                <span class="ingredient-name">${formatFeatureKey(k)}</span>
-                <span class="ingredient-dosage">${v}</span>
-              </div>
-            `).join('')}
+            ${Object.entries(features).filter(([k])=>!k.includes('ratio')).map(([k,v])=>`<div class="ingredient-item"><span class="ingredient-name">${formatKey(k)}</span><span class="ingredient-dosage">${v}</span></div>`).join('')}
           </div>
         </div>
       `;
-      
-      // 功率曲线卡片
+
+      const maxTime = controls.length>0 ? Math.max(...controls.map(c=>c.t||0)) : 1;
+      const points = controls.map(c=>{const t=c.t||0;const x=30+((t/maxTime)*360);const y=140-((c.power||0)/12000)*130;return`${x},${y}`;}).join(' ');
       const powerCard = `
-        <div class="waterfall-card" style="border-left-color:var(--primary)">
-          <h3><span class="icon">⚡</span> 功率曲线</h3>
+        <div class="waterfall-card" style="border-left-color:#dc3545">
+          <h3>⚡ 功率曲线</h3>
           <div style="height:200px;background:#fff;border-radius:8px;padding:16px">
-            ${controls.length > 0 ? `
-              <svg viewBox="0 0 400 150" style="width:100%;height:100%">
-                <line x1="30" y1="140" x2="390" y2="140" stroke="#ddd" stroke-width="1"/>
-                <line x1="30" y1="10" x2="30" y2="140" stroke="#ddd" stroke-width="1"/>
-                <text x="25" y="15" fill="#999" font-size="10">12kW</text>
-                <text x="380" y="145" fill="#999" font-size="10">${Math.max(...controls.map(c => c.t || 0))}s</text>
-                ${(() => {
-                  const maxTime = Math.max(...controls.map(c => c.t || 0), 1);
-                  const points = controls.map(c => {
-                    const x = 30 + ((c.t || 0) / maxTime) * 360;
-                    const y = 140 - ((c.power || 0) / 12000) * 130;
-                    return `${x},${y}`;
-                  }).join(' ');
-                  return `<polyline points="${points}" fill="none" stroke="var(--primary)" stroke-width="2"/>`;
-                })()}
-              </svg>
-            ` : '<div style="color:#999;text-align:center;padding:60px">暂无功率数据</div>'}
+            ${controls.length>0 ? `<svg viewBox="0 0 420 160" style="width:100%;height:100%"><line x1="30" y1="140" x2="410" y2="140" stroke="#ddd" stroke-width="1"/><line x1="30" y1="10" x2="30" y2="140" stroke="#ddd" stroke-width="1"/><text x="25" y="15" fill="#999" font-size="10">12kW</text><text x="400" y="145" fill="#999" font-size="10">${maxTime}s</text><polyline points="${points}" fill="none" stroke="#667eea" stroke-width="2"/>${controls.map((c,i)=>{const t=c.t||0;const x=30+((t/maxTime)*360);const y=140-((c.power||0)/12000)*130;return`<circle cx="${x}" cy="${y}" r="4" fill="#667eea"><title>${t}s: ${(c.power||0)/1000}kW</title></circle>`;}).join('')}</svg>` : '<div style="color:#999;text-align:center;padding:60px">暂无功率数据</div>'}
           </div>
         </div>
       `;
-      
+
       container.innerHTML = metaCard + timelineCard + ingredientsCard + featuresCard + powerCard;
     }
-    
-    function formatFeatureKey(key){
-      const names = {
-        'total_time': '总时长',
-        'step_count': '步骤数',
-        'manual_count': '人工点数',
-        'auto_dosing_count': '自动投料数',
-        'power_switch_count': '功率切换次数',
-        'concurrent_event_max': '最大并发事件'
-      };
-      return names[key] || key;
-    }
-    
-    // ============ 维度网络渲染 ============
+
+    function formatKey(k){ const n={'total_time':'总时长','step_count':'步骤数','manual_count':'人工点数','auto_dosing_count':'自动投料数','power_switch_count':'功率切换','concurrent_event_max':'最大并发'}; return n[k]||k; }
     function renderDimensions(){
       const container = document.getElementById('dimensionGrid');
-      container.innerHTML = Object.entries(state.dimensions).map(([dimName, subdims]) => `
-        <div class="dimension-card">
-          <h3>${getDimensionIcon(dimName)} ${dimName}</h3>
-          <div class="dimension-tree">
-            ${Object.entries(subdims).map(([subName, values]) => `
-              <div class="tree-item" onclick="toggleTreeItem(this)">
-                <div class="tree-item-label">
-                  <span>${subName}</span>
-                  <span class="tree-item-count">${values.length}</span>
-                </div>
-                <div class="tree-children">
-                  ${values.map(v => `<span class="tag tag-primary">${v}</span>`).join('')}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
+      container.innerHTML = Object.entries(state.dimensions).map(([dim,subs])=>`
+        <div class="dimension-card"><h3>📊 ${dim}</h3><div class="dimension-tree">${Object.entries(subs).map(([sub,vals])=>`<div class="tree-item" onclick="this.classList.toggle('expanded')"><div class="tree-item-label"><span>${sub}</span><span class="tree-item-count">${vals.length}</span></div><div class="tree-children">${vals.map(v=>`<span class="tag tag-primary">${v}</span>`).join('')}</div></div>`).join('')}</div></div>
       `).join('');
     }
-    
-    function getDimensionIcon(dimName){
-      const icons = {'场景维度':'🏢','商业维度':'💰','体验维度':'🌶️','地域维度':'🗺️','复杂度维度':'📐','健康合规':'🏥'};
-      return icons[dimName] || '📊';
-    }
-    
-    function toggleTreeItem(el){ el.classList.toggle('expanded'); }
-    
-    // ============ 初始化 ============
+
     window.onload = function(){ loadRecipes(); console.log('✅ V6 瀑布流版已加载'); };
   </script>
 </body>
