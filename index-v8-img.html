@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>智能菜谱 R&D 系统 V8 - 图片识别增强版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545;--info:#17a2b8;--dark:#1a1a2e;--light:#f8f9fa}
@@ -85,6 +86,12 @@
       <div class="card result" id="result">
         <h3>✅ 识别结果</h3>
         
+        <!-- 菜谱匹配成功提示 -->
+        <div class="recipe-match" id="recipeMatch" style="display:none;margin-bottom:20px">
+          <h4>🎯 匹配到菜谱库中的菜品</h4>
+          <div id="matchContent"></div>
+        </div>
+        
         <!-- 基础信息 -->
         <div class="info-grid">
           <div class="info-item">
@@ -137,10 +144,12 @@
           </div>
         </div>
         
-        <!-- 菜谱匹配 -->
-        <div class="recipe-match" id="recipeMatch" style="display:none">
-          <h4>🎯 匹配到的菜谱</h4>
-          <div id="matchContent"></div>
+        <!-- 菜谱详情瀑布流 -->
+        <div style="margin-top:20px">
+          <h4 style="margin-bottom:16px;font-size:16px;color:var(--dark)">📋 菜谱详情</h4>
+          <div class="waterfall-container" id="waterfallContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+            <!-- 动态生成 -->
+          </div>
         </div>
       </div>
     </div>
@@ -161,10 +170,24 @@
     // 加载参考菜谱
     async function loadReferenceRecipes() {
       try {
-        const res = await fetch('data/recipes-full.json');
-        const data = await res.json();
-        CONFIG.referenceRecipes = data.slice(0, 50);
-        console.log('加载参考菜谱:', CONFIG.referenceRecipes.length, '道');
+        // 尝试加载压缩的完整数据（13,510 条）
+        let data;
+        try {
+          const res = await fetch('data/processed/recipe-profiles.json.gz');
+          const blob = await res.blob();
+          const arrayBuffer = await blob.arrayBuffer();
+          const uncompressed = pako.ungzip(arrayBuffer, {to:'string'});
+          const jsonData = JSON.parse(uncompressed);
+          data = jsonData.profiles || [];
+          console.log('加载完整菜谱数据:', data.length, '条');
+        } catch (e) {
+          // 降级到小数据文件
+          const res = await fetch('data/recipes-full.json');
+          data = await res.json();
+          console.log('加载简化菜谱数据:', data.length, '条');
+        }
+        
+        CONFIG.referenceRecipes = data;
       } catch (e) {
         console.error('加载菜谱失败:', e);
         CONFIG.referenceRecipes = [
@@ -411,6 +434,104 @@
         </div>
       `;
       document.getElementById('matchedRecipe').textContent = match.recipe_name;
+      
+      // 加载菜谱详情
+      loadRecipeDetail(match.recipe_id);
+    }
+
+    // 加载菜谱详情
+    function loadRecipeDetail(recipeId) {
+      const recipe = CONFIG.referenceRecipes.find(r => r.id === recipeId);
+      if (!recipe) {
+        document.getElementById('waterfallContainer').innerHTML = '<div style="color:#999;text-align:center;padding:40px">暂无该菜谱详情</div>';
+        return;
+      }
+
+      const p = recipe.meta ? recipe : {
+        meta: {
+          id: recipe.id,
+          name: recipe.name,
+          cook_time: recipe.cook_time || recipe.cooking_time,
+          max_power: recipe.max_power,
+          portion_size: recipe.portion_size || 1
+        },
+        timeline: recipe.timeline || { controls: [], manual_ops: [], auto_dosing: [] },
+        ingredients_summary: recipe.ingredients_summary || [],
+        features: recipe.features || {}
+      };
+
+      renderWaterfall(p);
+    }
+
+    // 渲染瀑布流详情
+    function renderWaterfall(p) {
+      const container = document.getElementById('waterfallContainer');
+      const name = p.meta?.name || '未命名';
+      const controls = p.timeline?.controls || [];
+      const manual_ops = p.timeline?.manual_ops || [];
+      const auto_dosing = p.timeline?.auto_dosing || [];
+      const ingredients = p.ingredients_summary || [];
+      const features = p.features || {};
+
+      // 基础信息卡片
+      const metaCard = `
+        <div style="background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary)">
+          <h4 style="margin-bottom:16px">📋 基础信息</h4>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+            <div style="background:#fff;padding:12px;border-radius:8px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:var(--primary)">${name}</div>
+              <div style="font-size:12px;color:#999;margin-top:4px">菜谱名称</div>
+            </div>
+            <div style="background:#fff;padding:12px;border-radius:8px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:var(--primary)">${p.meta?.id||'-'}</div>
+              <div style="font-size:12px;color:#999;margin-top:4px">菜谱 ID</div>
+            </div>
+            <div style="background:#fff;padding:12px;border-radius:8px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:var(--primary)">${p.meta?.cook_time||0}s</div>
+              <div style="font-size:12px;color:#999;margin-top:4px">烹饪时长</div>
+            </div>
+            <div style="background:#fff;padding:12px;border-radius:8px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:var(--primary)">${(p.meta?.max_power||0)/1000}kW</div>
+              <div style="font-size:12px;color:#999;margin-top:4px">最大功率</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // 时间轴卡片
+      const allEvents = [...controls.map(c=>({t:c.t||0,text:c.commands||'',type:'control'})), ...manual_ops.map(m=>({t:m.t||0,text:m.text||'',type:'manual'})), ...auto_dosing.map(a=>({t:a.t||0,text:a.text||'',type:'auto'}))].sort((a,b)=>a.t-b.t);
+      const timelineCard = `
+        <div style="background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--warning)">
+          <h4 style="margin-bottom:16px">⏱️ 烹饪时间轴（${allEvents.length}个事件）</h4>
+          <div style="position:relative;padding-left:24px">
+            <div style="position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--primary),var(--secondary))"></div>
+            ${allEvents.map(e=>`
+              <div style="position:relative;margin-bottom:16px;padding:12px;background:#fff;border-radius:8px;border-left:3px solid var(--primary)">
+                <div style="font-size:12px;color:var(--primary);font-weight:600;margin-bottom:4px">${e.t}s</div>
+                <div style="font-size:14px;color:#666">${e.text||'无描述'}</div>
+                <span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;margin-top:8px;background:${e.type==='control'?'rgba(102,126,234,0.1)':'rgba(255,193,7,0.1)'};color:${e.type==='control'?'var(--primary)':'var(--warning)'}">${e.type==='control'?'功率控制':e.type==='manual'?'手动投料':'自动投料'}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      // 食材卡片
+      const ingredientsCard = `
+        <div style="background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--success)">
+          <h4 style="margin-bottom:16px">🥬 食材清单（${ingredients.length}种）</h4>
+          <div style="display:grid;gap:8px">
+            ${ingredients.length>0 ? ingredients.map(ing=>`
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#fff;border-radius:6px">
+                <span style="font-size:14px;color:#666">${ing.ingredientsId||'未知'}</span>
+                <span style="font-weight:600;color:var(--primary)">${ing.total_dosage||0}${ing.unit||'g'}</span>
+              </div>
+            `).join('') : '<div style="color:#999;text-align:center;padding:20px">暂无食材数据</div>'}
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = metaCard + timelineCard + ingredientsCard;
     }
 
     // 错误处理
