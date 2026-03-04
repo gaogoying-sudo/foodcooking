@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>菜谱 R&D 系统架构 - V7</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545;--info:#17a2b8;--dark:#1a1a2e;--light:#f8f9fa}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+    .container{max-width:1600px;margin:0 auto}
+    
+    /* 头部 */
+    .header{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);text-align:center}
+    .header h1{color:var(--dark);font-size:24px;margin-bottom:8px}
+    .header .subtitle{color:#666;font-size:14px}
+    
+    /* 版本切换 */
+    .version-select{position:absolute;top:20px;right:20px}
+    .version-btn{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+    .version-dropdown{position:absolute;top:100%;right:0;margin-top:8px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);min-width:200px;display:none;z-index:1000}
+    .version-dropdown.show{display:block}
+    .version-dropdown a{display:block;padding:12px 20px;color:#333;text-decoration:none;border-bottom:1px solid #f0f0f0}
+    .version-dropdown a:hover{background:#f8f9fa}
+    .version-dropdown a:last-child{border-bottom:none;border-radius:0 0 8px 8px}
+    .version-dropdown a.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+    
+    /* 架构图容器 */
+    .arch-container{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:20px}
+    
+    /* 模块卡片 */
+    .arch-module{background:#fff;border-radius:12px;padding:16px;box-shadow:0 4px 6px rgba(0,0,0,0.1);transition:transform 0.2s}
+    .arch-module:hover{transform:translateY(-4px);box-shadow:0 8px 16px rgba(0,0,0,0.15)}
+    .arch-module.header{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+    .arch-module.input{background:linear-gradient(135deg,#667eea,#4facfe)}
+    .arch-module.process{background:linear-gradient(135deg,#43e97b,#38f9d7)}
+    .arch-module.data{background:linear-gradient(135deg,#fa709a,#fee140)}
+    .arch-module.output{background:linear-gradient(135deg,#a8edea,#fed6e3)}
+    .arch-module.feedback{background:linear-gradient(135deg,#667eea,#764ba2)}
+    
+    .module-title{font-size:12px;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
+    .module-icon{font-size:24px;margin-bottom:8px}
+    .module-name{font-size:14px;font-weight:600;margin-bottom:12px}
+    
+    .sub-module{background:rgba(255,255,255,0.9);border-radius:8px;padding:12px;margin-bottom:8px}
+    .sub-module-title{font-size:11px;font-weight:600;color:#666;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .sub-module-content{font-size:11px;color:#666;line-height:1.5}
+    
+    .highlight-box{background:rgba(255,193,7,0.2);border:2px solid var(--warning);border-radius:8px;padding:12px;margin-top:12px}
+    .highlight-title{font-size:11px;font-weight:700;color:var(--warning);margin-bottom:8px}
+    
+    .arrow{font-size:20px;color:var(--primary);text-align:center;margin:8px 0}
+    
+    /* 流程图 */
+    .flow-container{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+    .flow-title{font-size:18px;font-weight:700;color:var(--dark);margin-bottom:16px;text-align:center}
+    .flow-steps{display:flex;justify-content:space-between;align-items:center;position:relative}
+    .flow-steps::before{content:'';position:absolute;top:20px;left:50px;right:50px;height:2px;background:linear-gradient(90deg,var(--primary),var(--secondary))}
+    .flow-step{position:relative;z-index:1;background:#fff;border:2px solid var(--primary);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary)}
+    .flow-label{position:absolute;top:50px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;color:#666}
+    
+    /* 说明卡片 */
+    .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .info-card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary)}
+    .info-card h3{font-size:16px;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .info-card ul{list-style:none;padding-left:0}
+    .info-card li{font-size:13px;color:#666;margin-bottom:8px;padding-left:16px;position:relative}
+    .info-card li::before{content:'•';position:absolute;left:0;color:var(--primary);font-weight:bold}
+    
+    /* 数据流 */
+    .dataflow{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border-radius:12px;padding:20px;margin-top:20px}
+    .dataflow h3{font-size:16px;margin-bottom:16px}
+    .dataflow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .dataflow-item{background:rgba(255,255,255,0.1);border-radius:8px;padding:16px}
+    .dataflow-item h4{font-size:14px;margin-bottom:8px}
+    .dataflow-item p{font-size:12px;opacity:0.9}
+    
+    /* 响应式 */
+    @media(max-width:1200px){
+      .arch-container{grid-template-columns:repeat(3,1fr)}
+      .info-grid{grid-template-columns:1fr}
+      .dataflow-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:768px){
+      .arch-container{grid-template-columns:1fr}
+      .flow-steps{flex-direction:column;gap:40px}
+      .flow-steps::before{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 头部 -->
+    <div class="header">
+      <h1>🍳 智能菜谱 R&D 与执行端到端系统架构</h1>
+      <p class="subtitle">INTELLIGENT RECIPE R&D AND EXECUTION END-TO-END SYSTEM ARCHITECTURE</p>
+    </div>
+    
+    <!-- 版本切换 -->
+    <div class="version-select">
+      <button class="version-btn" onclick="toggleVersionDropdown()">📦 返回其他版本 ▼</button>
+      <div class="version-dropdown" id="versionDropdown">
+        <a href="index.html">V1 极速版</a>
+        <a href="index-dimensions.html">V2 维度分析</a>
+        <a href="index-v3.html">V3 功能完整</a>
+        <a href="index-v4.html">V4 集成版</a>
+        <a href="index-v5.html">V5 虚拟滚动</a>
+        <a href="index-v6.html">V6 关系分析</a>
+        <a href="index-v7.html" class="active">V7 系统架构</a>
+      </div>
+    </div>
+    
+    <!-- 架构图 -->
+    <div class="arch-container">
+      <!-- A. 多模态输入层 -->
+      <div class="arch-module input">
+        <div class="module-title">A. MULTI-MODAL INPUT LAYER</div>
+        <div class="module-icon">🎤📷📝</div>
+        <div class="module-name">多模态输入层</div>
+        <div class="sub-module">
+          <div class="sub-module-title">🎤 语音输入</div>
+          <div class="sub-module-content">ASR/NLU<br>语音识别 + 自然语言理解</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">📷 图像输入</div>
+          <div class="sub-module-content">CV 分类/检索<br>图像识别模型</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">📝 文本输入</div>
+          <div class="sub-module-content">直接访问规则 + 词典<br>LLM 后端支持</div>
+        </div>
+      </div>
+      
+      <!-- B. 需求理解与标准化 -->
+      <div class="arch-module process">
+        <div class="module-title">B. DEMAND UNDERSTANDING & NORMALIZATION</div>
+        <div class="module-icon">🧠</div>
+        <div class="module-name">需求理解与标准化</div>
+        <div class="sub-module">
+          <div class="sub-module-title">🔍 NLP 请求提取</div>
+          <div class="sub-module-content">实体识别<br>意图分析</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">👁️ 视觉特征翻译</div>
+          <div class="sub-module-content">图像→特征向量<br>菜品分类</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">🔗 标准化与消歧</div>
+          <div class="sub-module-content">统一表达<br>消除歧义</div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-title">⭐ RECIPE DEMAND SPEC (RDS)</div>
+          <div class="sub-module-content" style="color:#fff">
+            需求端统一语言<br>
+            • 场景/体验/商业/约束<br>
+            • 味型/价格/时长/份量<br>
+            • 过敏原/设备限制
+          </div>
+        </div>
+      </div>
+      
+      <!-- C. 菜谱知识库与离线 ETL -->
+      <div class="arch-module data" style="grid-row:span 2">
+        <div class="module-title">C. RECIPE KNOWLEDGE BASE & OFFLINE ETL</div>
+        <div class="module-icon">🗄️</div>
+        <div class="module-name">菜谱知识库与离线 ETL</div>
+        <div class="sub-module">
+          <div class="sub-module-title">📥 原始数据导入</div>
+          <div class="sub-module-content">飞书多维表格<br>Excel/CSV 导出</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">🔨 RecipeProfile Builder</div>
+          <div class="sub-module-content">解析 cook_steps<br>解析 cooking_ingredient<br>特征计算</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">🏷️ 标签与嵌入</div>
+          <div class="sub-module-content">自动打标<br>向量化</div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-title">⭐ RECIPE STORE</div>
+          <div class="sub-module-content" style="color:#fff">
+            结构化菜谱存储<br>
+            • Tags/Features/Vector Index<br>
+            • 13,510 条菜谱数据
+          </div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-title">⭐ MAPPING/KNOBS LIBRARY</div>
+          <div class="sub-module-content" style="color:#fff">
+            映射规则库<br>
+            • 需求↔变量↔旋钮<br>
+            • 12 个可调控制变量
+          </div>
+        </div>
+      </div>
+      
+      <!-- D. 检索与召回 -->
+      <div class="arch-module process">
+        <div class="module-title">D. RETRIEVAL & RECALL</div>
+        <div class="module-icon">🔍</div>
+        <div class="module-name">检索与召回</div>
+        <div class="sub-module">
+          <div class="sub-module-title">🏷️ 标签过滤召回</div>
+          <div class="sub-module-content">按维度筛选<br>快速过滤</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">🎯 向量相似度召回</div>
+          <div class="sub-module-content">ANN 近似最近邻<br>语义相似度</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">📋 规则召回</div>
+          <div class="sub-module-content">硬规则匹配<br>业务逻辑</div>
+        </div>
+        <div class="arrow">⬇️</div>
+        <div class="sub-module" style="background:rgba(102,126,234,0.1);border:1px solid var(--primary)">
+          <div class="sub-module-title" style="color:var(--primary)">CANDIDATE RECIPES (TOP K)</div>
+          <div class="sub-module-content">候选菜谱池（Top K）</div>
+        </div>
+      </div>
+      
+      <!-- E. 可交付性约束检查与重排序 -->
+      <div class="arch-module process">
+        <div class="module-title">E. DELIVERABILITY CONSTRAINT CHECK & RE-RANKING</div>
+        <div class="module-icon">⚙️</div>
+        <div class="module-name">可交付性约束检查与重排序</div>
+        <div class="sub-module">
+          <div class="sub-module-title">🔒 约束引擎</div>
+          <div class="sub-module-content">"Want" vs "Can"的边界<br>设备能力检查</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">📱 设备适配</div>
+          <div class="sub-module-content">锅型/时间/料斗<br>设备参数映射</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">⏱️ 时长与并发</div>
+          <div class="sub-module-content">高峰时段可交付性<br>并发约束</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">⚠️ 质量风险</div>
+          <div class="sub-module-content">步骤异常检测<br>重复输入识别</div>
+        </div>
+        <div class="arrow">⬇️</div>
+        <div class="sub-module" style="background:rgba(40,167,69,0.1);border:1px solid var(--success)">
+          <div class="sub-module-title" style="color:var(--success)">RANKED TOP N + REASONS</div>
+          <div class="sub-module-content">排序后的 Top N + 推荐理由</div>
+        </div>
+      </div>
+      
+      <!-- F. 参数化生成与菜谱输出 -->
+      <div class="arch-module output">
+        <div class="module-title">F. PARAMETERIZED GENERATION & RECIPE OUTPUT</div>
+        <div class="module-icon">🎛️</div>
+        <div class="module-name">参数化生成与菜谱输出</div>
+        <div class="sub-module">
+          <div class="sub-module-title">🔄 两种模式</div>
+          <div class="sub-module-content">• 直接检索<br>• 参数化生成</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">🎚️ 参数调节</div>
+          <div class="sub-module-content">Seasoning Dose<br>Fire Control Curve<br>Serving Size</div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-title">⭐ RECIPEPROFILE</div>
+          <div class="sub-module-content" style="color:#fff">
+            交付端统一语言<br>
+            • 功率曲线<br>• 投料序列<br>• 时间轴 SOP
+          </div>
+        </div>
+        <div class="sub-module" style="background:rgba(255,193,7,0.2);border:2px solid var(--warning)">
+          <div class="sub-module-title" style="color:var(--warning)">EXECUTABLE RECIPE PACKAGE</div>
+          <div class="sub-module-content">标准 SOP + 设备指令 + 版本信息</div>
+        </div>
+      </div>
+      
+      <!-- G. 机器人执行与反馈闭环 -->
+      <div class="arch-module feedback">
+        <div class="module-title">G. ROBOT EXECUTION & FEEDBACK LOOP</div>
+        <div class="module-icon">🤖</div>
+        <div class="module-name">机器人执行与反馈闭环</div>
+        <div class="sub-module">
+          <div class="sub-module-title">🚀 调度执行</div>
+          <div class="sub-module-content">Kitchen OS<br>设备控制/料斗</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">📊 过程数据回传</div>
+          <div class="sub-module-content">实时状态监控<br>异常检测</div>
+        </div>
+        <div class="sub-module">
+          <div class="sub-module-title">📈 结果数据回传</div>
+          <div class="sub-module-content">出品时间/退菜率<br>评分/空盘率</div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-title">🔄 CLOSED LOOP OPTIMIZATION</div>
+          <div class="sub-module-content" style="color:#fff">
+            • 标签更新<br>
+            • 映射规则优化<br>
+            • 异常菜谱发现<br>
+            • 个性化推荐
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 数据流说明 -->
+    <div class="dataflow">
+      <h3>📊 数据流向说明</h3>
+      <div class="dataflow-grid">
+        <div class="dataflow-item">
+          <h4>🔵 KB Update（知识库更新）</h4>
+          <p>从反馈闭环到知识库的更新流，包括标签优化、规则更新、新菜谱入库</p>
+        </div>
+        <div class="dataflow-item">
+          <h4>🟢 Policy Update（策略更新）</h4>
+          <p>从执行结果到约束引擎的策略调整，优化排序和推荐逻辑</p>
+        </div>
+        <div class="dataflow-item">
+          <h4>🟡 KB Update（映射库更新）</h4>
+          <p>需求↔变量↔旋钮映射关系的持续优化和校准</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 详细说明 -->
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>🎯 核心交付物</h3>
+        <ul>
+          <li><strong>RDS (Recipe Demand Spec)</strong> - 需求端统一语言，将用户需求标准化为可处理的维度表达</li>
+          <li><strong>RecipeProfile</strong> - 交付端统一语言，将菜谱解析为设备可执行的标准化结构</li>
+          <li><strong>Mapping/Knobs Library</strong> - 需求↔交付映射规则库，12 个可调控制变量</li>
+          <li><strong>Executable Recipe Package</strong> - 可执行菜谱包，包含标准 SOP 和设备指令</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>🔄 闭环优化流程</h3>
+        <ul>
+          <li><strong>执行数据回传</strong> - 出品时间、退菜率、用户评分、空盘率</li>
+          <li><strong>异常检测</strong> - 识别步骤异常、重复输入、质量风险</li>
+          <li><strong>标签更新</strong> - 基于实际表现优化菜谱标签</li>
+          <li><strong>规则优化</strong> - 调整映射规则和推荐策略</li>
+          <li><strong>个性化推荐</strong> - 基于用户反馈的个性化菜谱推荐</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>📈 当前系统状态</h3>
+        <ul>
+          <li><strong>✅ V6 已完成</strong> - 菜谱库 (13,510 条) + 维度网络 + 瀑布流详情</li>
+          <li><strong>✅ 数据治理</strong> - RecipeProfile 解析器 + 去重 + 特征计算</li>
+          <li><strong>✅ 可视化</strong> - SOP 时间轴 + 功率曲线 + 食材清单</li>
+          <li><strong>⏳ V7 进行中</strong> - 系统架构可视化 + 模块说明</li>
+          <li><strong>⏳ 映射规则库</strong> - 需求↔变量↔旋钮映射规则待完善</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>🔧 技术栈说明</h3>
+        <ul>
+          <li><strong>输入层</strong> - ASR(语音识别) + CV(图像分类) + LLM(文本理解)</li>
+          <li><strong>检索层</strong> - 标签过滤 + 向量相似度 (ANN) + 规则匹配</li>
+          <li><strong>约束引擎</strong> - 设备能力检查 + 时长约束 + 质量风险评估</li>
+          <li><strong>生成层</strong> - 参数化菜谱生成 + 设备指令打包</li>
+          <li><strong>执行层</strong> - Kitchen OS + 设备控制 + 数据回传</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleVersionDropdown(){
+      document.getElementById('versionDropdown').classList.toggle('show');
+    }
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.version-select')){
+        document.getElementById('versionDropdown').classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>
