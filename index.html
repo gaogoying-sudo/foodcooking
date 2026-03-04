@@ -2,331 +2,180 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>菜谱维度分析系统 v4 - 完整版</title>
+  <title>菜谱系统 - 版本导航</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545;--info:#17a2b8;--dark:#1a1a2e;--light:#f8f9fa}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
-    .container{max-width:1600px;margin:0 auto}
-    .header{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
-    h1{color:var(--dark);font-size:28px;margin-bottom:8px}
-    .subtitle{color:#666;font-size:14px}
-    .version-notice{background:linear-gradient(135deg,var(--warning),#fd7e14);color:#fff;padding:12px 20px;border-radius:8px;margin-top:16px;font-size:13px}
-    .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
-    .tab{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;background:#f0f0f0;color:#666;transition:all 0.2s}
-    .tab:hover{background:#e0e0e0}
-    .tab.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
-    .tab .badge{background:var(--danger);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:8px}
-    .tab-content{display:none;background:#fff;border-radius:12px;padding:24px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
-    .tab-content.active{display:block}
-    .grid{display:grid;gap:20px}
-    .grid-2{grid-template-columns:repeat(2,1fr)}
-    .grid-3{grid-template-columns:repeat(3,1fr)}
-    .grid-4{grid-template-columns:repeat(4,1fr)}
-    @media(max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
-    .card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary);transition:all 0.2s;cursor:pointer}
-    .card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-    .card h3{font-size:16px;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-    .card .icon{font-size:20px}
-    .card-content{font-size:14px;color:#666;line-height:1.6}
-    .tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;margin:4px;background:#e0e0e0;color:#666}
-    .tag.primary{background:rgba(102,126,234,0.1);color:var(--primary)}
-    .tag.success{background:rgba(40,167,69,0.1);color:var(--success)}
-    .tag.warning{background:rgba(255,193,7,0.1);color:var(--warning)}
-    .tag.danger{background:rgba(220,53,69,0.1);color:var(--danger)}
-    .tree{margin-left:20px}
-    .tree-item{margin:8px 0;padding:12px;background:#fff;border-radius:8px;border-left:3px solid var(--primary)}
-    .tree-item-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-    .tree-item-title{font-weight:600;color:var(--dark)}
-    .tree-item-count{background:var(--primary);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px}
-    .tree-item-children{margin-top:12px;margin-left:20px;display:none}
-    .tree-item.active .tree-item-children{display:block}
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
-    .stat{background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:12px;padding:20px;color:#fff}
+    :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545;--info:#17a2b8}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:40px 20px}
+    .container{max-width:1200px;margin:0 auto}
+    .header{text-align:center;color:#fff;margin-bottom:40px}
+    .header h1{font-size:36px;margin-bottom:12px;text-shadow:0 2px 4px rgba(0,0,0,0.2)}
+    .header p{font-size:18px;opacity:0.9}
+    .version-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+    .version-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:transform 0.2s,box-shadow 0.2s;text-decoration:none;color:inherit}
+    .version-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+    .version-badge{display:inline-block;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:700;margin-bottom:16px}
+    .version-card.featured .version-badge{background:linear-gradient(135deg,#f093fb,#f5576c)}
+    .version-title{font-size:20px;font-weight:700;margin-bottom:12px;color:#333}
+    .version-desc{font-size:14px;color:#666;line-height:1.6;margin-bottom:16px}
+    .version-features{list-style:none;margin-bottom:20px}
+    .version-features li{font-size:13px;color:#555;margin-bottom:8px;padding-left:20px;position:relative}
+    .version-features li::before{content:'✓';position:absolute;left:0;color:var(--success);font-weight:bold}
+    .version-link{display:inline-block;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:opacity 0.2s}
+    .version-link:hover{opacity:0.9}
+    .stats{background:#fff;border-radius:12px;padding:24px;margin-top:40px;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+    .stats h2{font-size:20px;margin-bottom:16px;color:#333}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+    .stat-item{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border-radius:8px;padding:20px;text-align:center}
     .stat-value{font-size:32px;font-weight:700;margin-bottom:8px}
     .stat-label{font-size:14px;opacity:0.9}
-    .recipe-card{border:2px solid #e0e0e0;border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s}
-    .recipe-card:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-    .recipe-card.active{border-color:var(--primary);background:linear-gradient(135deg,rgba(102,126,234,0.05),rgba(118,75,162,0.05))}
-    .recipe-header{display:flex;gap:12px;margin-bottom:12px}
-    .recipe-img{width:80px;height:80px;border-radius:8px;object-fit:cover;background:#f0f0f0}
-    .recipe-info{flex:1}
-    .recipe-name{font-size:16px;font-weight:600;color:var(--dark);margin-bottom:4px}
-    .recipe-meta{display:flex;gap:12px;font-size:12px;color:#666;margin-bottom:8px}
-    .recipe-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
-    .btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:all 0.2s}
-    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
-    .btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
-    .search-box{display:flex;gap:12px;margin-bottom:20px}
-    .search-input{flex:1;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
-    .search-input:focus{outline:none;border-color:var(--primary)}
-    .progress{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
-    .progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));transition:width 0.3s}
-    .table{width:100%;border-collapse:collapse;margin-top:16px}
-    .table th,.table td{padding:12px;text-align:left;border-bottom:1px solid #e0e0e0;font-size:13px}
-    .table th{background:#f8f9fa;font-weight:600;color:#666}
-    .table tr:hover{background:#f8f9fa}
-    .mapping{display:flex;gap:20px;align-items:center;margin:20px 0}
-    .mapping-side{flex:1;background:#f8f9fa;border-radius:12px;padding:20px}
-    .mapping-arrow{font-size:40px;color:var(--primary)}
-    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all 0.2s}
-    .modal-overlay.active{opacity:1;visibility:visible}
-    .modal{background:#fff;border-radius:12px;max-width:900px;width:90%;max-height:90vh;overflow-y:auto;transform:scale(0.9);transition:transform 0.2s}
-    .modal-overlay.active .modal{transform:scale(1)}
-    .modal-header{padding:20px;border-bottom:2px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:10}
-    .modal-title{font-size:20px;font-weight:700;color:var(--dark)}
-    .modal-close{background:none;border:none;font-size:28px;cursor:pointer;color:#999}
-    .modal-body{padding:20px}
-    .section{margin-bottom:24px}
-    .section-title{font-size:16px;font-weight:600;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-    .dimension-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-    .dimension-item{background:#f8f9fa;padding:16px;border-radius:8px;border-left:3px solid var(--primary)}
-    .dimension-label{font-size:12px;color:#999;margin-bottom:8px}
-    .dimension-value{font-size:14px;color:var(--dark);font-weight:500}
-    .timeline{position:relative;padding-left:40px;margin:20px 0}
-    .timeline-item{position:relative;margin-bottom:20px;padding:16px;background:#f8f9fa;border-radius:8px;border-left:4px solid var(--primary)}
-    .timeline-time{position:absolute;left:-52px;top:16px;font-size:12px;color:#999;font-weight:600}
-    .timeline-content{font-size:14px;color:#666}
-    .input-group{margin-bottom:16px}
-    .input-label{display:block;font-size:14px;font-weight:500;color:var(--dark);margin-bottom:8px}
-    .input-field{width:100%;padding:10px 14px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
-    .input-field:focus{outline:none;border-color:var(--primary)}
-    .checkbox-group{display:flex;flex-wrap:wrap;gap:12px}
-    .checkbox-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8f9fa;border-radius:8px;cursor:pointer}
-    .checkbox-item input[type="checkbox"]{width:18px;height:18px}
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🍳 菜谱维度分析系统 v4</h1>
-      <p class="subtitle">需求端 ←→ 交付端 匹配关系 · 自动标签 · 维度配置 · 历史版本</p>
-      <div class="version-notice">
-        🎉 v4 新版：保留了维度网络可视化 + 新增菜谱详情弹窗 + 自动标签生成 + 维度配置工具 + 历史版本切换
-      </div>
+      <h1>🍳 智能菜谱 R&D 系统</h1>
+      <p>Intelligent Recipe R&D and Execution System</p>
     </div>
-
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('overview')">📊 总览</button>
-      <button class="tab" onclick="switchTab('dimensions')">🎯 维度网络</button>
-      <button class="tab" onclick="switchTab('recipes')">📋 菜谱库</button>
-      <button class="tab" onclick="switchTab('auto-tag')">🤖 自动标签</button>
-      <button class="tab" onclick="switchTab('config')">⚙️ 维度配置</button>
-      <button class="tab" onclick="switchTab('history')">📚 历史版本</button>
-      <button class="tab" onclick="switchTab('plan')">📅 迭代计划</button>
+    
+    <div class="version-grid">
+      <!-- V7 系统架构 -->
+      <a href="index-v7.html" class="version-card featured">
+        <span class="version-badge">🆕 V7.0</span>
+        <h3 class="version-title">系统架构可视化</h3>
+        <p class="version-desc">端到端 R&D 系统完整架构图，7 大模块详细展示</p>
+        <ul class="version-features">
+          <li>多模态输入层</li>
+          <li>需求理解与标准化</li>
+          <li>菜谱知识库与 ETL</li>
+          <li>检索与召回引擎</li>
+          <li>约束检查与重排序</li>
+          <li>参数化生成与输出</li>
+          <li>机器人执行与反馈</li>
+        </ul>
+        <span class="version-link">查看架构图 →</span>
+      </a>
+      
+      <!-- V6 关系分析 -->
+      <a href="index-v6.html" class="version-card">
+        <span class="version-badge">V6.1</span>
+        <h3 class="version-title">瀑布流详情分析</h3>
+        <p class="version-desc">13,510 条菜谱数据，瀑布流展示完整烹饪过程</p>
+        <ul class="version-features">
+          <li>13,510 条完整数据</li>
+          <li>瀑布流详情卡片</li>
+          <li>烹饪时间轴可视化</li>
+          <li>食材清单汇总</li>
+          <li>功率曲线图</li>
+          <li>结构化特征</li>
+        </ul>
+        <span class="version-link">开始分析 →</span>
+      </a>
+      
+      <!-- V5 虚拟滚动 -->
+      <a href="index-v5.html" class="version-card">
+        <span class="version-badge">V5.0</span>
+        <h3 class="version-title">虚拟滚动浏览</h3>
+        <p class="version-desc">支持万级数据流畅展示的虚拟滚动技术</p>
+        <ul class="version-features">
+          <li>虚拟滚动优化</li>
+          <li>流畅浏览体验</li>
+          <li>搜索筛选功能</li>
+          <li>多维度标签</li>
+        </ul>
+        <span class="version-link">浏览菜谱 →</span>
+      </a>
+      
+      <!-- V4 集成版 -->
+      <a href="index-v4.html" class="version-card">
+        <span class="version-badge">V4.0</span>
+        <h3 class="version-title">功能集成版</h3>
+        <p class="version-desc">7 个 Tab 完整功能集成，历史版本切换</p>
+        <ul class="version-features">
+          <li>7 个功能 Tab</li>
+          <li>维度网络可视化</li>
+          <li>自动标签生成</li>
+          <li>维度配置工具</li>
+          <li>历史版本切换</li>
+        </ul>
+        <span class="version-link">使用集成版 →</span>
+      </a>
+      
+      <!-- V3 功能完整 -->
+      <a href="index-v3.html" class="version-card">
+        <span class="version-badge">V3.0</span>
+        <h3 class="version-title">功能完整版</h3>
+        <p class="version-desc">菜谱库 + 自动标签 + 维度配置</p>
+        <ul class="version-features">
+          <li>菜谱库管理</li>
+          <li>自动标签生成</li>
+          <li>维度配置工具</li>
+        </ul>
+        <span class="version-link">查看功能 →</span>
+      </a>
+      
+      <!-- V2 维度分析 -->
+      <a href="index-dimensions.html" class="version-card">
+        <span class="version-badge">V2.0</span>
+        <h3 class="version-title">维度分析版</h3>
+        <p class="version-desc">6 大需求端维度网络可视化</p>
+        <ul class="version-features">
+          <li>场景维度</li>
+          <li>商业维度</li>
+          <li>体验维度</li>
+          <li>地域维度</li>
+          <li>复杂度维度</li>
+          <li>健康合规维度</li>
+        </ul>
+        <span class="version-link">查看维度 →</span>
+      </a>
+      
+      <!-- V1 极速版 -->
+      <a href="index-fast.html" class="version-card">
+        <span class="version-badge">V1.0</span>
+        <h3 class="version-title">极速预览版</h3>
+        <p class="version-desc">单菜谱快速预览，时间轴 + 功率曲线</p>
+        <ul class="version-features">
+          <li>单菜谱展示</li>
+          <li>时间轴可视化</li>
+          <li>功率曲线图</li>
+          <li>轻量快速</li>
+        </ul>
+        <span class="version-link">快速预览 →</span>
+      </a>
     </div>
-
-    <!-- Tab 1: 总览 -->
-    <div id="overview" class="tab-content active">
-      <div class="stats">
-        <div class="stat"><div class="stat-value">5</div><div class="stat-label">总菜谱数</div></div>
-        <div class="stat"><div class="stat-value">6</div><div class="stat-label">需求端维度</div></div>
-        <div class="stat"><div class="stat-value">3</div><div class="stat-label">交付端维度</div></div>
-        <div class="stat"><div class="stat-value">24</div><div class="stat-label">子维度</div></div>
-      </div>
-      <div class="grid grid-2">
-        <div class="card">
-          <h3><span class="icon">🎯</span> 需求端维度体系</h3>
-          <div class="card-content">
-            <div class="tag primary">场景维度</div><div class="tag primary">商业维度</div><div class="tag primary">体验维度</div>
-            <div class="tag primary">地域维度</div><div class="tag primary">复杂度</div><div class="tag primary">健康合规</div>
-            <div class="progress" style="margin-top:16px"><div class="progress-bar" style="width:100%"></div></div>
-            <p style="margin-top:12px;font-size:13px;color:#666">6 大维度 · 24 个子维度 · 100+ 标签</p>
-          </div>
+    
+    <!-- 统计信息 -->
+    <div class="stats">
+      <h2>📊 系统统计</h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">13,510</div>
+          <div class="stat-label">菜谱总数</div>
         </div>
-        <div class="card">
-          <h3><span class="icon">⚙️</span> 交付端维度体系</h3>
-          <div class="card-content">
-            <div class="tag success">设备控制</div><div class="tag success">投料控制</div><div class="tag success">生产约束</div>
-            <div class="progress" style="margin-top:16px"><div class="progress-bar" style="width:100%;background:linear-gradient(90deg,#28a745,#20c997)"></div></div>
-            <p style="margin-top:12px;font-size:13px;color:#666">3 大维度 · 15 个可控变量</p>
-          </div>
+        <div class="stat-item">
+          <div class="stat-value">6</div>
+          <div class="stat-label">需求端维度</div>
         </div>
-      </div>
-    </div>
-
-    <!-- Tab 2: 维度网络 (保留旧版完整功能) -->
-    <div id="dimensions" class="tab-content">
-      <h2 style="margin-bottom:20px;color:var(--dark)">🎯 需求端维度网络</h2>
-      <div class="grid grid-3">
-        <div class="card">
-          <h3><span class="icon">🏢</span> 1. 场景维度</h3>
-          <div class="tree">
-            <div class="tree-item active"><div class="tree-item-header"><span class="tree-item-title">1.1 用餐时段</span><span class="tree-item-count">5 标签</span></div>
-              <div class="tree-item-children"><div class="tag">早餐</div><div class="tag">午餐</div><div class="tag">晚餐</div><div class="tag">宵夜</div><div class="tag">全天候</div></div></div>
-            <div class="tree-item active"><div class="tree-item-header"><span class="tree-item-title">1.2 场地业态</span><span class="tree-item-count">8 标签</span></div>
-              <div class="tree-item-children"><div class="tag">正餐餐厅</div><div class="tag">快餐/简餐</div><div class="tag">酒店宴会</div><div class="tag">机场/高铁</div><div class="tag">团餐/食堂</div><div class="tag">外卖档口</div><div class="tag">景区/会展</div><div class="tag">连锁门店</div></div></div>
-          </div>
+        <div class="stat-item">
+          <div class="stat-value">3</div>
+          <div class="stat-label">交付端维度</div>
         </div>
-        <div class="card">
-          <h3><span class="icon">💰</span> 2. 商业维度</h3>
-          <div class="tree">
-            <div class="tree-item active"><div class="tree-item-header"><span class="tree-item-title">2.1 价格带</span><span class="tree-item-count">5 标签</span></div>
-              <div class="tree-item-children"><div class="tag">平价</div><div class="tag">中端</div><div class="tag">精品</div><div class="tag">高端</div><div class="tag">促销引流款</div></div></div>
-            <div class="tree-item"><div class="tree-item-header"><span class="tree-item-title">2.2 份量规格</span><span class="tree-item-count">4 标签</span></div>
-              <div class="tree-item-children"><div class="tag">单人份</div><div class="tag">双人份</div><div class="tag">家庭份</div><div class="tag">宴会份</div></div></div>
-          </div>
+        <div class="stat-item">
+          <div class="stat-value">12</div>
+          <div class="stat-label">控制变量 (旋钮)</div>
         </div>
-        <div class="card">
-          <h3><span class="icon">🌶️</span> 3. 体验维度</h3>
-          <div class="tree">
-            <div class="tree-item active"><div class="tree-item-header"><span class="tree-item-title">3.1 味型</span><span class="tree-item-count">12 标签</span></div>
-              <div class="tree-item-children"><div class="tag">咸鲜</div><div class="tag">麻辣</div><div class="tag">香辣</div><div class="tag">酸辣</div><div class="tag">酸甜</div><div class="tag">甜口</div><div class="tag">蒜香</div><div class="tag">葱香</div><div class="tag">咖喱</div><div class="tag">黑椒</div><div class="tag">清淡</div><div class="tag">原汁</div></div></div>
-            <div class="tree-item"><div class="tree-item-header"><span class="tree-item-title">3.2 口感/质构</span><span class="tree-item-count">7 标签</span></div>
-              <div class="tree-item-children"><div class="tag">脆</div><div class="tag">嫩</div><div class="tag">糯</div><div class="tag">软烂</div><div class="tag">爽滑</div><div class="tag">干香</div><div class="tag">多汁</div></div></div>
-          </div>
+        <div class="stat-item">
+          <div class="stat-value">7</div>
+          <div class="stat-label">系统版本</div>
         </div>
-        <div class="card">
-          <h3><span class="icon">🗺️</span> 4. 地域维度</h3>
-          <div class="tree">
-            <div class="tree-item"><div class="tree-item-header"><span class="tree-item-title">4.1 国家/菜系</span><span class="tree-item-count">6 标签</span></div>
-              <div class="tree-item-children"><div class="tag">中餐 - 川菜</div><div class="tag">中餐 - 湘菜</div><div class="tag">中餐 - 粤菜</div><div class="tag">中餐 - 鲁菜</div><div class="tag">日韩</div><div class="tag">东南亚</div></div></div>
-            <div class="tree-item"><div class="tree-item-header"><span class="tree-item-title">4.2 中国区域</span><span class="tree-item-count">7 标签</span></div>
-              <div class="tree-item-children"><div class="tag">东北</div><div class="tag">华北</div><div class="tag">华东</div><div class="tag">华中</div><div class="tag">华南</div><div class="tag">西南</div><div class="tag">西北</div></div></div>
-          </div>
+        <div class="stat-item">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">本地计算 (0 token)</div>
         </div>
-        <div class="card">
-          <h3><span class="icon">📐</span> 5. 复杂度维度</h3>
-          <div class="tree">
-            <div class="tree-item"><div class="tree-item-header"><span class="tree-item-title">5.1 工艺复杂度</span><span class="tree-item-count">4 标签</span></div>
-              <div class="tree-item-children"><div class="tag">步骤数≤5</div><div class="tag">步骤数 6-10</div><div class="tag">功率切换≤2</div><div class="tag">需预处理</div></div></div>
-            <div class="tree-item"><div class="tree-item-header"><span class="tree-item-title">5.2 生产复杂度</span><span class="tree-item-count">4 标签</span></div>
-              <div class="tree-item-children"><div class="tag">人工投料≤3 次</div><div class="tag">自动投料≥70%</div><div class="tag">并发投料点</div><div class="tag">关键易错动作</div></div></div>
-          </div>
-        </div>
-        <div class="card">
-          <h3><span class="icon">🏥</span> 6. 健康合规</h3>
-          <div class="tree">
-            <div class="tree-item"><div class="tree-item-header"><span class="tree-item-title">6.1 过敏原</span><span class="tree-item-count">5 标签</span></div>
-              <div class="tree-item-children"><div class="tag">花生</div><div class="tag">坚果</div><div class="tag">海鲜</div><div class="tag">蛋奶</div><div class="tag">麸质</div></div></div>
-            <div class="tree-item"><div class="tree-item-header"><span class="tree-item-title">6.2 特殊饮食</span><span class="tree-item-count">4 标签</span></div>
-              <div class="tree-item-children"><div class="tag">清真</div><div class="tag">素食</div><div class="tag">低盐</div><div class="tag">低脂</div></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab 3: 菜谱库 -->
-    <div id="recipes" class="tab-content">
-      <h2 style="margin-bottom:20px">📋 菜谱库</h2>
-      <div class="search-box">
-        <input type="text" class="search-input" placeholder="搜索菜谱名称、ID、标签..." onkeyup="filterRecipes(this.value)">
-        <button class="btn btn-primary" onclick="filterRecipes(document.querySelector('.search-input').value)">🔍 搜索</button>
-      </div>
-      <div class="grid grid-3" id="recipeGrid"></div>
-    </div>
-
-    <!-- Tab 4: 自动标签 -->
-    <div id="auto-tag" class="tab-content">
-      <h2 style="margin-bottom:20px">🤖 自动标签生成</h2>
-      <div class="grid grid-2">
-        <div>
-          <h3 style="margin-bottom:16px">规则配置</h3>
-          <div class="input-group"><label class="input-label">辣度关键词</label><input type="text" class="input-field" value="辣/麻辣/香辣/酸辣" id="spicyKeywords"></div>
-          <div class="input-group"><label class="input-label">甜味关键词</label><input type="text" class="input-field" value="糖/甜/蜜" id="sweetKeywords"></div>
-          <button class="btn btn-primary" onclick="generateTags()">🚀 生成标签</button>
-        </div>
-        <div><h3 style="margin-bottom:16px">生成结果</h3><div id="tagResults" style="background:#f8f9fa;padding:16px;border-radius:8px;min-height:200px"></div></div>
-      </div>
-    </div>
-
-    <!-- Tab 5: 维度配置 -->
-    <div id="config" class="tab-content">
-      <h2 style="margin-bottom:20px">⚙️ 维度配置工具</h2>
-      <div class="grid grid-2"><div><h3 style="margin-bottom:16px">选择菜谱</h3><select class="input-field" id="configRecipeSelect" onchange="loadRecipeForConfig()"><option value="">请选择菜谱...</option></select></div><div></div></div>
-      <div id="configPanel" style="margin-top:20px;display:none">
-        <div class="section"><h3 class="section-title">🎯 需求端维度</h3>
-          <div class="dimension-grid">
-            <div class="dimension-item"><div class="dimension-label">用餐时段</div><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" value="早餐"> 早餐</label><label class="checkbox-item"><input type="checkbox" value="午餐"> 午餐</label><label class="checkbox-item"><input type="checkbox" value="晚餐"> 晚餐</label></div></div>
-            <div class="dimension-item"><div class="dimension-label">价格带</div><select class="input-field" id="priceRange"><option value="平价">平价</option><option value="中端">中端</option><option value="精品">精品</option></select></div>
-            <div class="dimension-item"><div class="dimension-label">份量规格</div><select class="input-field" id="portionSize"><option value="单人份">单人份</option><option value="双人份">双人份</option><option value="家庭份">家庭份</option></select></div>
-            <div class="dimension-item"><div class="dimension-label">味型</div><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" value="咸鲜"> 咸鲜</label><label class="checkbox-item"><input type="checkbox" value="麻辣"> 麻辣</label><label class="checkbox-item"><input type="checkbox" value="香辣"> 香辣</label></div></div>
-          </div>
-        </div>
-        <div class="section"><h3 class="section-title">⚙️ 交付端维度</h3>
-          <div class="dimension-grid">
-            <div class="dimension-item"><div class="dimension-label">自动化程度</div><input type="range" class="input-field" min="0" max="100" value="65" id="automationLevel" oninput="document.getElementById('autoValue').textContent=this.value+'%'"><div style="text-align:center;font-weight:600;color:var(--primary)"><span id="autoValue">65%</span></div></div>
-            <div class="dimension-item"><div class="dimension-label">工艺复杂度</div><select class="input-field" id="complexity"><option value="简单">简单 (≤5 步骤)</option><option value="中等">中等 (6-10 步骤)</option><option value="复杂">复杂 (>10 步骤)</option></select></div>
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="saveConfig()">💾 保存配置</button>
-      </div>
-    </div>
-
-    <!-- Tab 6: 历史版本 -->
-    <div id="history" class="tab-content">
-      <h2 style="margin-bottom:20px">📚 历史版本</h2>
-      <div class="timeline">
-        <div class="timeline-item">
-          <div class="timeline-time">v4</div>
-          <div class="timeline-content"><strong>当前版本</strong>（2026-03-03 18:30）<br>✅ 保留维度网络 + 菜谱详情弹窗 + 自动标签 + 维度配置 + 历史版本切换</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-time">v3</div>
-          <div class="timeline-content"><strong>功能完整版</strong>（2026-03-03 18:20）<br>📋 菜谱库 + 🤖 自动标签 + ⚙️ 维度配置 + 📅 迭代计划</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-time">v2</div>
-          <div class="timeline-content"><strong>维度分析版</strong>（2026-03-03 18:00）<br>📊 总览 + 🎯 需求端 + ⚙️ 交付端 + 🔗 映射关系 + 📋 菜谱库 + 🔍 分析洞察</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-time">v1</div>
-          <div class="timeline-content"><strong>极速版</strong>（2026-03-03 17:50）<br>🍳 单菜谱展示 + ⏱️ 时间轴 + 📊 功率曲线</div>
-        </div>
-      </div>
-      <div style="margin-top:20px;padding:20px;background:#f8f9fa;border-radius:12px">
-        <h3 style="margin-bottom:16px">🔗 快速访问链接</h3>
-        <div style="display:grid;gap:12px">
-          <div style="padding:12px;background:#fff;border-radius:8px"><a href="index-v3.html" target="_blank" style="color:var(--primary;text-decoration:none">📋 v3 功能完整版</a></div>
-          <div style="padding:12px;background:#fff;border-radius:8px"><a href="index-dimensions.html" target="_blank" style="color:var(--primary);text-decoration:none">📊 v2 维度分析版</a></div>
-          <div style="padding:12px;background:#fff;border-radius:8px"><a href="index-fast.html" target="_blank" style="color:var(--primary);text-decoration:none">🍳 v1 极速版</a></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab 7: 迭代计划 -->
-    <div id="plan" class="tab-content">
-      <h2 style="margin-bottom:20px">📅 迭代开发计划</h2>
-      <div class="timeline">
-        <div class="timeline-item"><div class="timeline-time">Phase 1</div><div class="timeline-content"><strong>维度可视化 + 标记展示</strong>（本周）<br><span class="tag success">✅ 维度网络界面</span> <span class="tag success">✅ 菜谱详情弹窗</span> <span class="tag success">✅ 自动标签生成</span> <span class="tag success">✅ 维度配置工具</span></div></div>
-        <div class="timeline-item"><div class="timeline-time">Phase 2</div><div class="timeline-content"><strong>批量导入 + 自动打标</strong>（2026-03-04）<br><span class="tag">CSV/JSON 批量导入</span> <span class="tag">自动标签算法</span> <span class="tag">批量编辑工具</span></div></div>
-        <div class="timeline-item"><div class="timeline-time">Phase 3</div><div class="timeline-content"><strong>关系分析 + 控制变量提炼</strong>（2026-03-05）<br><span class="tag">相关性分析</span> <span class="tag">聚类可视化</span> <span class="tag">控制变量提炼</span></div></div>
-        <div class="timeline-item"><div class="timeline-time">Phase 4</div><div class="timeline-content"><strong>推荐系统 + 语音/图片输入</strong>（2026-03-10）<br><span class="tag">需求→菜谱推荐</span> <span class="tag">语音输入接口</span> <span class="tag">图片识别接口</span></div></div>
       </div>
     </div>
   </div>
-
-  <!-- Modal -->
-  <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-header"><div class="modal-title" id="modalTitle">菜谱详情</div><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="modal-body" id="modalBody"></div></div></div>
-
-  <script>
-    const RECIPES = [
-      {id:138,name:"辣椒炒肉",time:175,power:12000,tags:["香辣","咸鲜","中饱","单人份","川菜","西南","工艺简单"],automation:65,
-       dimensions:{demand:{time:"午餐",price:"平价",portion:"单人份",taste:["香辣","咸鲜"],region:"西南",complexity:"简单"},delivery:{automation:65,complexity:"简单",powerCurve:[8000,5000,6000],manualPoints:5,autoIngredients:["盐","蚝油","生抽","老抽","鸡精"]}}},
-      {id:139,name:"辣椒炒肉 (加糖版)",time:175,power:12000,tags:["香辣","咸鲜","微甜","中饱","单人份","川菜"],automation:65,
-       dimensions:{demand:{time:"午餐",price:"平价",portion:"单人份",taste:["香辣","咸鲜","微甜"],region:"西南",complexity:"简单"},delivery:{automation:65,complexity:"简单",powerCurve:[8000,5000,6000],manualPoints:5,autoIngredients:["盐","蚝油","生抽","老抽","鸡精","糖"]}}},
-      {id:141,name:"辣椒炒肉 (大份)",time:215,power:12000,tags:["香辣","咸鲜","长饱","家庭份","川菜","西南"],automation:60,
-       dimensions:{demand:{time:"晚餐",price:"平价",portion:"家庭份",taste:["香辣","咸鲜"],region:"西南",complexity:"中等"},delivery:{automation:60,complexity:"中等",powerCurve:[8000,8000,6000],manualPoints:6,autoIngredients:["花生油","盐","鸡精","糖","生抽","蚝油","老抽"]}}},
-      {id:144,name:"辣椒炒肉大份加豆豉版",time:215,power:12000,tags:["香辣","咸鲜","豉香","长饱","家庭份","川菜"],automation:60,
-       dimensions:{demand:{time:"晚餐",price:"平价",portion:"家庭份",taste:["香辣","咸鲜","豉香"],region:"西南",complexity:"中等"},delivery:{automation:60,complexity:"中等",powerCurve:[8000,8000,6000],manualPoints:6,autoIngredients:["花生油","盐","鸡精","生抽","蚝油","老抽","豆豉"]}}},
-      {id:149,name:"辣椒炒肉加豆豉版",time:175,power:12000,tags:["香辣","咸鲜","豉香","中饱","单人份","川菜"],automation:65,
-       dimensions:{demand:{time:"午餐",price:"平价",portion:"单人份",taste:["香辣","咸鲜","豉香"],region:"西南",complexity:"简单"},delivery:{automation:65,complexity:"简单",powerCurve:[8000,5000,6000],manualPoints:5,autoIngredients:["猪油","盐","鸡精","生抽","蚝油","老抽","豆豉"]}}}
-    ];
-
-    function switchTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));event.target.classList.add('active');document.getElementById(id).classList.add('active');}
-    document.querySelectorAll('.tree-item-header').forEach(h=>h.addEventListener('click',()=>{h.parentElement.classList.toggle('active');}));
-
-    function renderRecipes(filter=''){const grid=document.getElementById('recipeGrid');const filtered=RECIPES.filter(r=>!filter||r.name.toLowerCase().includes(filter.toLowerCase())||r.tags.some(t=>t.includes(filter))||r.id.toString().includes(filter));grid.innerHTML=filtered.map(r=>`<div class="recipe-card" onclick="showRecipeDetail(${r.id})"><div class="recipe-header"><img class="recipe-img" src="https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg"><div class="recipe-info"><div class="recipe-name">${r.name}</div><div class="recipe-meta"><span>⏱️ ${r.time}s</span><span>⚡ ${r.power}W</span></div><div class="recipe-tags">${r.tags.slice(0,4).map(t=>`<span class="tag primary">${t}</span>`).join('')}</div></div></div><div style="margin-top:12px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px"><span>自动化程度</span><span>${r.automation}%</span></div><div class="progress"><div class="progress-bar" style="width:${r.automation}%"></div></div></div></div>`).join('');}
-    function filterRecipes(val){renderRecipes(val);}
-
-    function showRecipeDetail(id){const r=RECIPES.find(x=>x.id===id);const d=r.dimensions;document.getElementById('modalTitle').textContent=r.name;document.getElementById('modalBody').innerHTML=`<div class="section"><h3 class="section-title">📋 基础信息</h3><div class="dimension-grid"><div class="dimension-item"><div class="dimension-label">烹饪时长</div><div class="dimension-value">${r.time}秒</div></div><div class="dimension-item"><div class="dimension-label">最大功率</div><div class="dimension-value">${r.power}W</div></div><div class="dimension-item"><div class="dimension-label">自动化程度</div><div class="dimension-value">${r.automation}%</div></div><div class="dimension-item"><div class="dimension-label">工艺复杂度</div><div class="dimension-value">${d.demand.complexity}</div></div></div></div><div class="section"><h3 class="section-title">🎯 需求端维度标记</h3><div class="dimension-grid"><div class="dimension-item"><div class="dimension-label">用餐时段</div><div class="dimension-value">${d.demand.time}</div></div><div class="dimension-item"><div class="dimension-label">价格带</div><div class="dimension-value">${d.demand.price}</div></div><div class="dimension-item"><div class="dimension-label">份量规格</div><div class="dimension-value">${d.demand.portion}</div></div><div class="dimension-item"><div class="dimension-label">地域菜系</div><div class="dimension-value">${d.demand.region}</div></div><div class="dimension-item" style="grid-column:1/-1"><div class="dimension-label">味型</div><div class="dimension-value">${d.demand.taste.join(' / ')}</div></div></div></div><div class="section"><h3 class="section-title">⚙️ 交付端维度标记</h3><div class="dimension-grid"><div class="dimension-item"><div class="dimension-label">自动化程度</div><div class="dimension-value">${d.delivery.automation}%</div></div><div class="dimension-item"><div class="dimension-label">工艺复杂度</div><div class="dimension-value">${d.delivery.complexity}</div></div><div class="dimension-item"><div class="dimension-label">人工投料点</div><div class="dimension-value">${d.delivery.manualPoints}次</div></div><div class="dimension-item" style="grid-column:1/-1"><div class="dimension-label">功率曲线</div><div class="dimension-value">${d.delivery.powerCurve.join('W → ')}W</div></div><div class="dimension-item" style="grid-column:1/-1"><div class="dimension-label">自动投料物料</div><div class="dimension-value">${d.delivery.autoIngredients.join(' / ')}</div></div></div></div><div class="section"><h3 class="section-title">🔗 需求←→交付 映射关系</h3><table class="table"><thead><tr><th>需求维度</th><th>需求值</th><th>交付控制变量</th><th>实现逻辑</th></tr></thead><tbody><tr><td>味型 - 香辣</td><td>辣度中</td><td>辣椒投料</td><td>辣椒 20g，t=61s 投放</td></tr><tr><td>味型 - 咸鲜</td><td>咸度中</td><td>盐 + 生抽 + 蚝油</td><td>盐 2.3g+ 生抽 6g+ 蚝油 8g</td></tr><tr><td>份量 - 单人份</td><td>1 人食</td><td>配料剂量</td><td>肉 150g+ 椒 200g</td></tr><tr><td>时效 - 快速</td><td>&lt;3min</td><td>总时长控制</td><td>175 秒 (2 分 55 秒)</td></tr><tr><td>口感 - 嫩</td><td>肉嫩</td><td>下肉时机 + 功率</td><td>t=128s，5000W 低温炒制</td></tr></tbody></table></div><div class="section"><h3 class="section-title">🎛️ 可调控制变量（旋钮）</h3><div class="control-vars" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"><span class="tag warning">🌶️ 辣度 (0-5)</span><span class="tag warning">🧂 咸度 (0-5)</span><span class="tag warning">🍬 甜度 (0-5)</span><span class="tag warning">🛢️ 油量 (0-5)</span><span class="tag warning">🔥 锅气 (弱/中/强)</span><span class="tag warning">💧 收汁 (少/中/多)</span><span class="tag warning">🥩 嫩度 (0-5)</span></div></div>`;document.getElementById('modal').classList.add('active');}
-    function closeModal(){document.getElementById('modal').classList.remove('active');}
-    function generateTags(){let html='<h4 style="margin-bottom:12px">生成结果：</h4>';RECIPES.forEach(r=>{const tags=[];if(r.name.match(/辣 | 麻辣 | 香辣/))tags.push('香辣');if(r.name.match(/糖 | 甜 | 蜜/))tags.push('微甜');if(r.name.match(/豆豉/))tags.push('豉香');if(r.time<=180)tags.push('快速出餐');if(r.automation>=60)tags.push('高自动化');if(r.name.match(/大份 | 家庭/))tags.push('家庭份');html+=`<div style="padding:12px;background:#fff;border-radius:8px;margin-bottom:8px"><strong>${r.name}</strong><br><div style="margin-top:8px">${tags.map(t=>`<span class="tag success">${t}</span>`).join('')}</div></div>`;});document.getElementById('tagResults').innerHTML=html;}
-    function loadRecipeForConfig(){const id=document.getElementById('configRecipeSelect').value;if(!id){document.getElementById('configPanel').style.display='none';return;}document.getElementById('configPanel').style.display='block';}
-    function saveConfig(){alert('配置已保存！(演示功能)');}
-
-    window.onload=function(){renderRecipes();const select=document.getElementById('configRecipeSelect');RECIPES.forEach(r=>{const opt=document.createElement('option');opt.value=r.id;opt.textContent=r.name;select.appendChild(opt);});console.log('✅ Recipe Dimension Analyzer v4 loaded!');};
-  </script>
 </body>
 </html>
