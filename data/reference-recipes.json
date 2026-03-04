@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "provided_by": "#cook",
+    "provided_at": "2026-03-04T16:10:00+08:00",
+    "total_recipes": 10,
+    "source": "recipe-visualizer/data/processed/recipe-profiles.json"
+  },
+  "recipes": [
+    {
+      "id": 138,
+      "name": "辣椒炒肉",
+      "cook_time": 175,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg",
+      "ingredients_count": 11,
+      "features": {
+        "total_time": 175,
+        "step_count": 11,
+        "manual_count": 5,
+        "auto_dosing_count": 3,
+        "power_switch_count": 2,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.27",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 144,
+      "name": "辣椒炒肉大份加豆豉版",
+      "cook_time": 215,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg",
+      "ingredients_count": 11,
+      "features": {
+        "total_time": 215,
+        "step_count": 13,
+        "manual_count": 5,
+        "auto_dosing_count": 5,
+        "power_switch_count": 1,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.38",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 148,
+      "name": "辣椒炒肉大份加银耳版",
+      "cook_time": 215,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg",
+      "ingredients_count": 10,
+      "features": {
+        "total_time": 215,
+        "step_count": 12,
+        "manual_count": 4,
+        "auto_dosing_count": 5,
+        "power_switch_count": 1,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.42",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 149,
+      "name": "辣椒炒肉加豆豉版",
+      "cook_time": 175,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg",
+      "ingredients_count": 12,
+      "features": {
+        "total_time": 175,
+        "step_count": 11,
+        "manual_count": 5,
+        "auto_dosing_count": 3,
+        "power_switch_count": 2,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.27",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 154,
+      "name": "辣椒炒肉健康版",
+      "cook_time": 175,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg",
+      "ingredients_count": 9,
+      "features": {
+        "total_time": 175,
+        "step_count": 9,
+        "manual_count": 4,
+        "auto_dosing_count": 2,
+        "power_switch_count": 2,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.22",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 4232,
+      "name": "辣椒炒肉少盐版",
+      "cook_time": 0,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg",
+      "ingredients_count": 9,
+      "features": {
+        "total_time": 187,
+        "step_count": 11,
+        "manual_count": 3,
+        "auto_dosing_count": 2,
+        "power_switch_count": 3,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.18",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 4233,
+      "name": "辣椒炒肉加辣版",
+      "cook_time": 0,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg",
+      "ingredients_count": 10,
+      "features": {
+        "total_time": 187,
+        "step_count": 11,
+        "manual_count": 3,
+        "auto_dosing_count": 2,
+        "power_switch_count": 3,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.18",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 4234,
+      "name": "辣椒炒肉少油版",
+      "cook_time": 0,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop/recipe/lajiaochaorou.jpg",
+      "ingredients_count": 9,
+      "features": {
+        "total_time": 187,
+        "step_count": 12,
+        "manual_count": 3,
+        "auto_dosing_count": 2,
+        "power_switch_count": 3,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.17",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 5012,
+      "name": "辣椒炒肉4份 (东莞嗦面舍)",
+      "cook_time": 163,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/mall/2022/2/29/992373d5-4041-433a-9a36-2819c979c0a3.png",
+      "ingredients_count": 6,
+      "features": {
+        "total_time": 163,
+        "step_count": 11,
+        "manual_count": 3,
+        "auto_dosing_count": 0,
+        "power_switch_count": 1,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.00",
+        "risk_flags": []
+      }
+    },
+    {
+      "id": 5289,
+      "name": "鱼香肉丝川版_Max",
+      "cook_time": 155,
+      "max_power": 12000,
+      "picture": "https://chbtv2-1305920492.cos.ap-shanghai.myqcloud.com/sop%2Frecipe%2Fyuxiangrousidongbeibanxiaofen5290.jpg",
+      "ingredients_count": 11,
+      "features": {
+        "total_time": 155,
+        "step_count": 14,
+        "manual_count": 3,
+        "auto_dosing_count": 0,
+        "power_switch_count": 4,
+        "concurrent_event_max": 1,
+        "auto_dosing_ratio": "0.00",
+        "risk_flags": []
+      }
+    }
+  ]
+}

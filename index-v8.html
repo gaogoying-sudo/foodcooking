@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>智能菜谱 R&D 系统 V8</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545;--info:#17a2b8;--dark:#1a1a2e;--light:#f8f9fa;--header-height:60px;--sidebar-width:240px}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:#f5f6fa;overflow:hidden}
+    
+    /* 顶部导航 */
+    .header{position:fixed;top:0;left:0;right:0;height:var(--header-height);background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:1000}
+    .header-left{display:flex;align-items:center;gap:16px}
+    .header-logo{font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .header-search{background:rgba(255,255,255,0.2);border:none;border-radius:20px;padding:8px 16px;color:#fff;width:300px;outline:none}
+    .header-search::placeholder{color:rgba(255,255,255,0.7)}
+    .header-right{display:flex;align-items:center;gap:16px}
+    .header-btn{background:rgba(255,255,255,0.2);border:none;border-radius:6px;padding:8px 16px;color:#fff;cursor:pointer;font-size:14px;transition:background 0.2s}
+    .header-btn:hover{background:rgba(255,255,255,0.3)}
+    
+    /* 左侧菜单 */
+    .sidebar{position:fixed;top:var(--header-height);left:0;width:var(--sidebar-width);bottom:0;background:#fff;box-shadow:2px 0 8px rgba(0,0,0,0.1);overflow-y:auto;z-index:900}
+    .menu-group{padding:16px 0;border-bottom:1px solid #f0f0f0}
+    .menu-group-title{padding:0 20px 8px;font-size:12px;color:#999;font-weight:600;text-transform:uppercase}
+    .menu-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:all 0.2s;color:#333;text-decoration:none}
+    .menu-item:hover{background:#f5f6fa;color:var(--primary)}
+    .menu-item.active{background:linear-gradient(90deg,rgba(102,126,234,0.1),transparent);border-left:3px solid var(--primary);color:var(--primary);font-weight:600}
+    .menu-icon{font-size:18px;width:24px;text-align:center}
+    .menu-label{font-size:14px;flex:1}
+    .menu-badge{background:var(--danger);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px}
+    
+    /* 主内容区 */
+    .main-content{position:fixed;top:var(--header-height);left:var(--sidebar-width);right:0;bottom:0;padding:24px;overflow-y:auto;background:#f5f6fa}
+    .content-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:20px}
+    .content-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .content-title{font-size:20px;font-weight:700;color:#333}
+    .content-actions{display:flex;gap:12px}
+    
+    /* 功能模块 */
+    .module-container{display:none}
+    .module-container.active{display:block}
+    
+    /* 图片上传 */
+    .upload-area{border:2px dashed #ddd;border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all 0.2s}
+    .upload-area:hover{border-color:var(--primary);background:rgba(102,126,234,0.05)}
+    .upload-icon{font-size:48px;color:#ddd;margin-bottom:16px}
+    .upload-text{font-size:16px;color:#666;margin-bottom:8px}
+    .upload-hint{font-size:13px;color:#999}
+    
+    /* 统计卡片 */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
+    .stat-card{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border-radius:12px;padding:20px}
+    .stat-value{font-size:32px;font-weight:700;margin-bottom:8px}
+    .stat-label{font-size:14px;opacity:0.9}
+    
+    /* 菜谱网格 */
+    .recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .recipe-card{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;transition:all 0.2s;cursor:pointer}
+    .recipe-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.12);transform:translateY(-2px)}
+    .recipe-img{width:100%;height:160px;object-fit:cover;background:#f0f0f0}
+    .recipe-info{padding:16px}
+    .recipe-name{font-size:16px;font-weight:600;margin-bottom:8px;color:#333}
+    .recipe-meta{display:flex;gap:12px;font-size:12px;color:#666;margin-bottom:12px}
+    .recipe-tags{display:flex;flex-wrap:wrap;gap:4px}
+    .tag{padding:2px 8px;border-radius:12px;font-size:11px;background:#f0f0f0;color:#666}
+    
+    /* 维度网络 */
+    .dimension-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+    .dimension-card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary)}
+    .dimension-card h3{color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .tree-item{margin:8px 0;padding:8px 12px;background:#fff;border-radius:6px;cursor:pointer}
+    .tree-item-label{display:flex;justify-content:space-between;align-items:center}
+    .tree-item-count{background:#e0e0e0;color:#666;padding:2px 8px;border-radius:10px;font-size:12px}
+    .tree-children{margin-left:16px;margin-top:8px;display:block}
+    
+    /* 瀑布流详情 */
+    .waterfall-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px}
+    .waterfall-card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary)}
+    .waterfall-card h3{color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .timeline-waterfall{position:relative;padding-left:24px}
+    .timeline-waterfall::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--primary),var(--secondary))}
+    .timeline-event{position:relative;margin-bottom:16px;padding:12px 16px;background:#fff;border-radius:8px;border-left:3px solid var(--primary)}
+    .timeline-event::before{content:'';position:absolute;left:-20px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--primary);border:2px solid #fff}
+    .timeline-time{font-size:12px;color:var(--primary);font-weight:600;margin-bottom:4px}
+    .timeline-text{font-size:14px;color:#666}
+    .timeline-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;margin-right:4px}
+    .tag-control{background:rgba(102,126,234,0.1);color:var(--primary)}
+    .tag-manual{background:rgba(255,193,7,0.1);color:var(--warning)}
+    .tag-auto{background:rgba(40,167,69,0.1);color:var(--success)}
+    
+    /* 加载状态 */
+    .loading{text-align:center;padding:60px 20px;color:#666}
+    .loading-spinner{border:4px solid #f3f3f3;border-top:4px solid var(--primary);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 20px}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    
+    /* 响应式 */
+    @media(max-width:1200px){
+      :root{--sidebar-width:200px}
+    }
+    @media(max-width:768px){
+      :root{--sidebar-width:0}
+      .sidebar{display:none}
+      .main-content{left:0}
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo">🍳 智能菜谱 R&D 系统</div>
+      <input type="text" class="header-search" placeholder="搜索菜谱、功能..." id="globalSearch">
+    </div>
+    <div class="header-right">
+      <button class="header-btn" onclick="location.href='index.html'">📦 旧版导航</button>
+      <button class="header-btn">🔔 消息</button>
+      <button class="header-btn">👤 管理员</button>
+    </div>
+  </div>
+  
+  <!-- 左侧菜单 -->
+  <div class="sidebar">
+    <div class="menu-group">
+      <div class="menu-group-title">核心功能</div>
+      <a href="#" class="menu-item active" onclick="switchModule('dashboard',this)">
+        <span class="menu-icon">📊</span>
+        <span class="menu-label">系统总览</span>
+      </a>
+      <a href="#" class="menu-item" onclick="switchModule('recipes',this)">
+        <span class="menu-icon">🍳</span>
+        <span class="menu-label">菜谱库</span>
+        <span class="menu-badge">13,510</span>
+      </a>
+      <a href="#" class="menu-item" onclick="switchModule('upload',this)">
+        <span class="menu-icon">📷</span>
+        <span class="menu-label">图片识别</span>
+      </a>
+    </div>
+    <div class="menu-group">
+      <div class="menu-group-title">分析工具</div>
+      <a href="#" class="menu-item" onclick="switchModule('dimensions',this)">
+        <span class="menu-icon">🎯</span>
+        <span class="menu-label">维度网络</span>
+      </a>
+      <a href="#" class="menu-item" onclick="switchModule('architecture',this)">
+        <span class="menu-icon">🏗️</span>
+        <span class="menu-label">系统架构</span>
+      </a>
+    </div>
+    <div class="menu-group">
+      <div class="menu-group-title">系统</div>
+      <a href="#" class="menu-item" onclick="switchModule('settings',this)">
+        <span class="menu-icon">⚙️</span>
+        <span class="menu-label">设置</span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- 主内容区 -->
+  <div class="main-content">
+    <!-- 系统总览 -->
+    <div id="dashboard" class="module-container active">
+      <div class="content-card">
+        <div class="content-header">
+          <h2 class="content-title">📊 系统总览</h2>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">13,510</div>
+            <div class="stat-label">菜谱总数</div>
+          </div>
+          <div class="stat-card" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">
+            <div class="stat-value">6</div>
+            <div class="stat-label">需求端维度</div>
+          </div>
+          <div class="stat-card" style="background:linear-gradient(135deg,#fa709a,#fee140)">
+            <div class="stat-value">3</div>
+            <div class="stat-label">交付端维度</div>
+          </div>
+          <div class="stat-card" style="background:linear-gradient(135deg,#a8edea,#fed6e3)">
+            <div class="stat-value">12</div>
+            <div class="stat-label">控制变量</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="content-card">
+        <div class="content-header">
+          <h3 class="content-title">🍳 热门菜谱</h3>
+          <div class="content-actions">
+            <button class="header-btn" onclick="switchModule('recipes')">查看全部</button>
+          </div>
+        </div>
+        <div class="recipe-grid" id="hotRecipes">
+          <div class="loading"><div class="loading-spinner"></div><div>加载中...</div></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 菜谱库 -->
+    <div id="recipes" class="module-container">
+      <div class="content-card">
+        <div class="content-header">
+          <h2 class="content-title">🍳 菜谱库管理</h2>
+          <div class="content-actions">
+            <input type="text" class="header-search" placeholder="搜索菜谱..." id="recipeSearch" style="width:200px;background:#f5f6fa;color:#333">
+          </div>
+        </div>
+        <div class="recipe-grid" id="recipeGrid">
+          <div class="loading"><div class="loading-spinner"></div><div>加载 13,510 条菜谱...</div></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 图片识别 -->
+    <div id="upload" class="module-container">
+      <div class="content-card">
+        <div class="content-header">
+          <h2 class="content-title">📷 图片识别菜谱</h2>
+        </div>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">点击或拖拽上传图片</div>
+          <div class="upload-hint">支持 JPG、PNG 格式，最大 10MB</div>
+          <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+        </div>
+        <div id="uploadResult" style="margin-top:20px;display:none">
+          <h3 style="margin-bottom:16px">识别结果</h3>
+          <div class="waterfall-container" id="uploadResultContent"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 维度网络 -->
+    <div id="dimensions" class="module-container">
+      <div class="content-card">
+        <div class="content-header">
+          <h2 class="content-title">🎯 需求端维度网络</h2>
+        </div>
+        <div class="dimension-grid" id="dimensionGrid">
+          <!-- 维度卡片将在这里生成 -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- 系统架构 -->
+    <div id="architecture" class="module-container">
+      <div class="content-card">
+        <div class="content-header">
+          <h2 class="content-title">🏗️ 系统架构可视化</h2>
+          <div class="content-actions">
+            <button class="header-btn" onclick="window.open('index-v7.html','_blank')">全屏查看</button>
+          </div>
+        </div>
+        <iframe src="index-v7.html" style="width:100%;height:800px;border:none;border-radius:8px"></iframe>
+      </div>
+    </div>
+    
+    <!-- 设置 -->
+    <div id="settings" class="module-container">
+      <div class="content-card">
+        <div class="content-header">
+          <h2 class="content-title">⚙️ 系统设置</h2>
+        </div>
+        <div style="padding:40px;text-align:center;color:#999">
+          <div style="font-size:48px;margin-bottom:16px">🔧</div>
+          <div>系统设置功能开发中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 状态管理
+    const state = {
+      recipes: [],
+      dimensions: {
+        '场景维度': {'用餐时段':['早餐','午餐','晚餐','夜宵','全天候'],'场地业态':['正餐餐厅','快餐简餐','酒店宴会','团餐食堂','外卖档口'],'份量规格':['单人份','双人份','家庭份','宴会份']},
+        '商业维度': {'价格带':['平价','中端','精品','高端'],'出餐效率':['快速 (<3min)','标准 (3-6min)','慢速 (>6min)']},
+        '体验维度': {'味型':['麻辣','香辣','酸辣','咸鲜','蒜香','酱香','糖醋','红烧'],'口感':['脆','嫩','糯','软烂','爽滑','干香','多汁'],'饱腹感':['低','中','高']},
+        '地域维度': {'菜系':['川菜','湘菜','粤菜','鲁菜','江浙菜'],'区域':['东北','华北','华东','华南','西南','西北']},
+        '复杂度维度': {'步骤数':['简单 (≤5)','中等 (6-10)','复杂 (>10)'],'人工点':['少 (≤3)','中 (4-7)','多 (>7)']},
+        '健康合规': {'过敏原':['花生','坚果','海鲜','蛋奶','麸质'],'特殊饮食':['清真','素食','低盐','低脂','低糖']}
+      }
+    };
+    
+    // 模块切换
+    function switchModule(moduleId,el){
+      document.querySelectorAll('.module-container').forEach(m=>m.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(i=>i.classList.remove('active'));
+      document.getElementById(moduleId).classList.add('active');
+      if(el) el.classList.add('active');
+      
+      if(moduleId==='dimensions') renderDimensions();
+      if(moduleId==='recipes') renderRecipes();
+    }
+    
+    // 加载菜谱数据
+    async function loadRecipes(){
+      try{
+        const res = await fetch('data/recipes-full.json');
+        const data = await res.json();
+        state.recipes = data.slice(0,50); // 只加载前 50 条用于展示
+        renderHotRecipes();
+      }catch(e){
+        console.error('加载失败:',e);
+      }
+    }
+    
+    // 渲染热门菜谱
+    function renderHotRecipes(){
+      const container = document.getElementById('hotRecipes');
+      const recipes = state.recipes.slice(0,8);
+      container.innerHTML = recipes.map(r=>`
+        <div class="recipe-card">
+          <div class="recipe-img" style="background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:48px">🍳</div>
+          <div class="recipe-info">
+            <div class="recipe-name">${r.name||'未命名'}</div>
+            <div class="recipe-meta">
+              <span>⏱️ ${r.cooking_time||0}s</span>
+              <span>⚡ ${(r.max_power||0)/1000}kW</span>
+            </div>
+            <div class="recipe-tags">
+              <span class="tag">川菜</span>
+              <span class="tag">香辣</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 渲染菜谱库
+    function renderRecipes(){
+      const container = document.getElementById('recipeGrid');
+      if(state.recipes.length===0){
+        container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div>加载中...</div></div>';
+        return;
+      }
+      container.innerHTML = state.recipes.map(r=>`
+        <div class="recipe-card">
+          <div class="recipe-img" style="background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:48px">🍳</div>
+          <div class="recipe-info">
+            <div class="recipe-name">${r.name||'未命名'}</div>
+            <div class="recipe-meta">
+              <span>⏱️ ${r.cooking_time||0}s</span>
+              <span>⚡ ${(r.max_power||0)/1000}kW</span>
+            </div>
+            <div class="recipe-tags">
+              <span class="tag">川菜</span>
+              <span class="tag">香辣</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 渲染维度网络
+    function renderDimensions(){
+      const container = document.getElementById('dimensionGrid');
+      container.innerHTML = Object.entries(state.dimensions).map(([dim,subs])=>`
+        <div class="dimension-card">
+          <h3>📊 ${dim}</h3>
+          <div class="dimension-tree">
+            ${Object.entries(subs).map(([sub,vals])=>`
+              <div class="tree-item">
+                <div class="tree-item-label">
+                  <span>${sub}</span>
+                  <span class="tree-item-count">${vals.length}</span>
+                </div>
+                <div class="tree-children">
+                  ${vals.map(v=>`<span class="tag" style="margin:4px">${v}</span>`).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 图片上传处理
+    function handleImageUpload(event){
+      const file = event.target.files[0];
+      if(!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e){
+        document.getElementById('uploadResult').style.display = 'block';
+        document.getElementById('uploadResultContent').innerHTML = `
+          <div class="waterfall-card">
+            <h3>📷 识别结果</h3>
+            <div style="text-align:center;padding:40px">
+              <div style="font-size:48px;margin-bottom:16px">✅</div>
+              <div style="font-size:16px;color:#333;margin-bottom:8px">图片上传成功！</div>
+              <div style="color:#666">文件名：${file.name}</div>
+              <div style="color:#666">大小：${(file.size/1024).toFixed(2)} KB</div>
+              <div style="margin-top:20px;padding:16px;background:#f8f9fa;border-radius:8px">
+                <div style="color:#999;font-size:14px">⚠️ 图片识别 API 待接入</div>
+                <div style="color:#666;font-size:13px;margin-top:8px">当前展示模拟结果，实际需对接 #img 群的识别服务</div>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // 全局搜索
+    document.getElementById('globalSearch').addEventListener('input',function(e){
+      const val = e.target.value.toLowerCase();
+      if(val.length>0){
+        switchModule('recipes',document.querySelectorAll('.menu-item')[1]);
+        document.getElementById('recipeSearch').value = val;
+      }
+    });
+    
+    // 初始化
+    window.onload = function(){
+      loadRecipes();
+      console.log('✅ V8 控制台版已加载');
+    };
+  </script>
+</body>
+</html>
