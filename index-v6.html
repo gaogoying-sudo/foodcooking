@@ -2,17 +2,32 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>菜谱关系分析系统 v6 - SOP 时间轴</title>
+  <title>菜谱关系分析系统 V6</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- pako.js 用于解压 gzip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545;--info:#17a2b8;--dark:#1a1a2e;--light:#f8f9fa}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
     .container{max-width:1800px;margin:0 auto}
-    .header{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
-    h1{color:var(--dark);font-size:28px;margin-bottom:8px}
-    .subtitle{color:#666;font-size:14px}
-    .version-badge{display:inline-block;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;margin-left:12px}
+    
+    /* 头部样式 */
+    .header{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center}
+    .header-left h1{color:var(--dark);font-size:28px;margin-bottom:8px}
+    .header-left .subtitle{color:#666;font-size:14px}
+    
+    /* 版本切换按钮 */
+    .version-select{position:relative}
+    .version-btn{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+    .version-dropdown{position:absolute;top:100%;right:0;margin-top:8px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);min-width:200px;display:none;z-index:1000}
+    .version-dropdown.show{display:block}
+    .version-dropdown a{display:block;padding:12px 20px;color:#333;text-decoration:none;border-bottom:1px solid #f0f0f0;transition:background 0.2s}
+    .version-dropdown a:hover{background:#f8f9fa}
+    .version-dropdown a:last-child{border-bottom:none;border-radius:0 0 8px 8px}
+    .version-dropdown a.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+    
+    /* 标签页 */
     .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
     .tab{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;background:#f0f0f0;color:#666;transition:all 0.2s}
     .tab:hover{background:#e0e0e0}
@@ -20,17 +35,37 @@
     .tab-content{display:none;background:#fff;border-radius:12px;padding:24px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
     .tab-content.active{display:block}
     
-    /* V6 特有样式 */
+    /* 统计面板 */
     .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
     .stat{background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:12px;padding:20px;color:#fff}
     .stat-value{font-size:32px;font-weight:700;margin-bottom:8px}
     .stat-label{font-size:14px;opacity:0.9}
     
-    .recipe-list{height:600px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:8px;background:#fff}
+    /* 搜索框 */
+    .search-box{display:flex;gap:12px;margin-bottom:20px}
+    .search-input{flex:1;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
+    .search-input:focus{outline:none;border-color:var(--primary)}
+    
+    /* 菜谱列表 */
+    .recipe-list{height:500px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:8px;background:#fff}
     .recipe-item{padding:16px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:all 0.2s}
     .recipe-item:hover{background:#f8f9fa}
     .recipe-item.active{background:linear-gradient(90deg,rgba(102,126,234,0.1),transparent);border-left:3px solid var(--primary)}
     
+    /* 维度网络 */
+    .dimension-network{margin-top:20px}
+    .dimension-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+    .dimension-card{background:#f8f9fa;border-radius:12px;padding:20px;border-left:4px solid var(--primary)}
+    .dimension-card h3{color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .dimension-tree{margin-left:12px}
+    .tree-item{margin:8px 0;padding:8px 12px;background:#fff;border-radius:6px;border-left:2px solid #ddd;cursor:pointer}
+    .tree-item:hover{border-left-color:var(--primary);background:#f0f0f0}
+    .tree-item-label{display:flex;justify-content:space-between;align-items:center;font-size:14px}
+    .tree-item-count{background:#e0e0e0;color:#666;padding:2px 8px;border-radius:10px;font-size:12px}
+    .tree-children{margin-left:16px;margin-top:8px;display:none}
+    .tree-item.expanded .tree-children{display:block}
+    
+    /* SOP 时间轴 */
     .sop-container{margin-top:20px}
     .power-chart{height:300px;background:#f8f9fa;border-radius:8px;padding:20px;position:relative}
     .power-svg{width:100%;height:100%}
@@ -46,36 +81,53 @@
     .tag-manual{background:rgba(255,193,7,0.2);color:var(--warning)}
     .tag-auto{background:rgba(40,167,69,0.2);color:var(--success)}
     
+    /* 加载状态 */
     .loading{text-align:center;padding:60px 20px;color:#666}
     .loading-spinner{border:4px solid #f3f3f3;border-top:4px solid var(--primary);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 20px}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     
-    .search-box{display:flex;gap:12px;margin-bottom:20px}
-    .search-input{flex:1;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
-    .search-input:focus{outline:none;border-color:var(--primary)}
+    /* 标签 */
+    .tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;margin:4px}
+    .tag-primary{background:rgba(102,126,234,0.1);color:var(--primary)}
+    .tag-success{background:rgba(40,167,69,0.1);color:var(--success)}
+    .tag-warning{background:rgba(255,193,7,0.1);color:var(--warning)}
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- 头部 -->
     <div class="header">
-      <h1>🍳 菜谱关系分析系统 <span class="version-badge">V6 SOP 时间轴</span></h1>
-      <p class="subtitle">需求端 ↔ 交付端 ↔ 控制变量 映射体系</p>
+      <div class="header-left">
+        <h1>🍳 菜谱关系分析系统</h1>
+        <p class="subtitle">需求端 ↔ 交付端 ↔ 控制变量 映射体系</p>
+      </div>
+      <div class="version-select">
+        <button class="version-btn" onclick="toggleVersionDropdown()">
+          📦 版本切换 <span style="font-size:12px;opacity:0.8">▼</span>
+        </button>
+        <div class="version-dropdown" id="versionDropdown">
+          <a href="index.html">V1 极速版</a>
+          <a href="index-dimensions.html">V2 维度分析</a>
+          <a href="index-v3.html">V3 功能完整</a>
+          <a href="index-v4.html">V4 集成版</a>
+          <a href="index-v5.html">V5 虚拟滚动</a>
+          <a href="index-v6.html" class="active">V6 关系分析</a>
+        </div>
+      </div>
     </div>
     
+    <!-- 标签页 -->
     <div class="tabs">
-      <button class="tab" onclick="location.href='index.html'">V1 极速</button>
-      <button class="tab" onclick="location.href='index-dimensions.html'">V2 维度</button>
-      <button class="tab" onclick="location.href='index-v3.html'">V3 完整</button>
-      <button class="tab" onclick="location.href='index-v4.html'">V4 集成</button>
-      <button class="tab" onclick="location.href='index-v5.html'">V5 滚动</button>
-      <button class="tab active">V6 分析</button>
+      <button class="tab active" onclick="switchTab('recipes')">📋 菜谱库</button>
+      <button class="tab" onclick="switchTab('dimensions')">🎯 维度网络</button>
+      <button class="tab" onclick="switchTab('sop')">📊 SOP 时间轴</button>
     </div>
     
-    <!-- Tab 1: 菜谱列表 -->
+    <!-- Tab 1: 菜谱库 -->
     <div id="recipes" class="tab-content active">
       <div class="stats">
         <div class="stat">
-          <div class="stat-value" id="totalCount">0</div>
+          <div class="stat-value" id="totalCount">加载中...</div>
           <div class="stat-label">总菜谱数</div>
         </div>
         <div class="stat">
@@ -83,7 +135,7 @@
           <div class="stat-label">平均时长</div>
         </div>
         <div class="stat">
-          <div class="stat-value" id="avgPower">0W</div>
+          <div class="stat-value" id="avgPower">0kW</div>
           <div class="stat-label">平均功率</div>
         </div>
         <div class="stat">
@@ -105,7 +157,15 @@
       </div>
     </div>
     
-    <!-- Tab 2: SOP 时间轴 -->
+    <!-- Tab 2: 维度网络 -->
+    <div id="dimensions" class="tab-content">
+      <h2 style="margin-bottom:20px">🎯 需求端维度网络</h2>
+      <div class="dimension-grid" id="dimensionGrid">
+        <!-- 维度卡片将在这里生成 -->
+      </div>
+    </div>
+    
+    <!-- Tab 3: SOP 时间轴 -->
     <div id="sop" class="tab-content">
       <h2 style="margin-bottom:20px">📊 SOP 时间轴 - <span id="sopRecipeName">选择菜谱</span></h2>
       
@@ -126,29 +186,92 @@
     const state = {
       recipes: [],
       filtered: [],
-      selected: null
+      selected: null,
+      dimensions: {
+        '场景维度': {
+          '用餐时段': ['早餐', '午餐', '晚餐', '夜宵', '全天候'],
+          '场地业态': ['正餐餐厅', '快餐简餐', '酒店宴会', '机场高铁', '团餐食堂', '外卖档口'],
+          '份量规格': ['单人份', '双人份', '家庭份', '宴会份']
+        },
+        '商业维度': {
+          '价格带': ['平价', '中端', '精品', '高端', '促销款'],
+          '出餐效率': ['快速 (<3min)', '标准 (3-6min)', '慢速 (>6min)']
+        },
+        '体验维度': {
+          '味型': ['麻辣', '香辣', '酸辣', '咸鲜', '蒜香', '酱香', '糖醋', '红烧'],
+          '口感': ['脆', '嫩', '糯', '软烂', '爽滑', '干香', '多汁'],
+          '饱腹感': ['低饱腹', '中饱腹', '高饱腹']
+        },
+        '地域维度': {
+          '菜系': ['川菜', '湘菜', '粤菜', '鲁菜', '江浙菜', '日韩', '东南亚'],
+          '区域': ['东北', '华北', '华东', '华中', '华南', '西南', '西北']
+        },
+        '复杂度维度': {
+          '步骤数': ['简单 (≤5)', '中等 (6-10)', '复杂 (>10)'],
+          '人工点': ['少 (≤3)', '中 (4-7)', '多 (>7)']
+        },
+        '健康合规': {
+          '过敏原': ['花生', '坚果', '海鲜', '蛋奶', '麸质'],
+          '特殊饮食': ['清真', '素食', '低盐', '低脂', '低糖']
+        }
+      }
     };
+    
+    // ============ 版本切换 ============
+    function toggleVersionDropdown(){
+      document.getElementById('versionDropdown').classList.toggle('show');
+    }
+    
+    // 点击外部关闭下拉菜单
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.version-select')){
+        document.getElementById('versionDropdown').classList.remove('show');
+      }
+    });
+    
+    // ============ 标签页切换 ============
+    function switchTab(id){
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(id).classList.add('active');
+      
+      if(id === 'dimensions') renderDimensions();
+    }
     
     // ============ 数据加载 ============
     async function loadRecipes(){
       console.log('🚀 V6 开始加载数据...');
       
       try{
-        const res = await fetch('data/processed/recipe-profiles.json.gz');
-        if(!res.ok) throw new Error('HTTP ' + res.status);
+        // 先尝试加载小数据文件（36 条）
+        let data;
+        try{
+          const res = await fetch('data/recipes-full.json');
+          if(res.ok) data = { recipes: await res.json() };
+        }catch(e){
+          console.log('小数据加载失败，尝试大数据...');
+        }
         
-        const blob = await res.blob();
-        const text = await blob.text();
-        const data = JSON.parse(text);
+        // 如果没有数据，尝试加载压缩大数据
+        if(!data || !data.recipes || data.recipes.length === 0){
+          console.log('加载压缩数据...');
+          const res = await fetch('data/processed/recipe-profiles.json.gz');
+          const blob = await res.blob();
+          const arrayBuffer = await blob.arrayBuffer();
+          const uncompressed = pako.ungzip(arrayBuffer, { to: 'string' });
+          const jsonData = JSON.parse(uncompressed);
+          data = { recipes: jsonData.profiles || [] };
+        }
         
-        console.log('📊 原始数据:', data.profiles?.length || 0, '条');
+        console.log('📊 原始数据:', data.recipes?.length || 0, '条');
         
-        state.recipes = (data.profiles || []).map(p => ({
-          id: p.meta?.id || 0,
-          name: p.meta?.name || '未命名',
-          time: p.meta?.cook_time || p.features?.total_time || 0,
-          power: p.meta?.max_power || 12000,
-          automation: Math.round((1 - (p.features?.manual_count / (p.features?.step_count || 1))) * 100),
+        state.recipes = (data.recipes || []).map(p => ({
+          id: p.meta?.id || p.id || 0,
+          name: p.meta?.name || p.name || '未命名',
+          time: p.meta?.cook_time || p.features?.total_time || p.cooking_time || 0,
+          power: p.meta?.max_power || p.max_power || 12000,
+          automation: p.features ? Math.round((1 - (p.features.manual_count / (p.features.step_count || 1))) * 100) : 65,
           profile: p
         }));
         
@@ -156,7 +279,18 @@
         
       }catch(e){
         console.error('❌ 加载失败:', e);
-        state.recipes = [];
+        // 降级到示例数据
+        state.recipes = [
+          {id:138,name:"辣椒炒肉",time:175,power:12000,automation:65,profile:{}},
+          {id:139,name:"辣椒炒肉 (加糖版)",time:175,power:12000,automation:65,profile:{}},
+          {id:141,name:"辣椒炒肉 (大份)",time:215,power:12000,automation:60,profile:{}},
+          {id:144,name:"辣椒炒肉大份加豆豉版",time:215,power:12000,automation:60,profile:{}},
+          {id:3008,name:"辣椒炒肉",time:175,power:12000,automation:65,profile:{}},
+          {id:4113,name:"辣椒炒肉_Max",time:187,power:12000,automation:65,profile:{}},
+          {id:4509,name:"辣椒炒肉_小份_简单版",time:187,power:12000,automation:65,profile:{}},
+          {id:4523,name:"辣椒炒肉_中份",time:189,power:12000,automation:60,profile:{}}
+        ];
+        console.log('⚠️ 使用示例数据:', state.recipes.length, '条');
       }
       
       state.filtered = [...state.recipes];
@@ -168,13 +302,13 @@
     function updateStats(){
       document.getElementById('totalCount').textContent = state.recipes.length.toLocaleString();
       
-      const avgTime = state.recipes.reduce((s,r) => s + r.time, 0) / (state.recipes.length || 1);
+      const avgTime = state.recipes.reduce((s,r) => s + (r.time || 0), 0) / (state.recipes.length || 1);
       document.getElementById('avgTime').textContent = Math.round(avgTime) + 's';
       
-      const avgPower = state.recipes.reduce((s,r) => s + r.power, 0) / (state.recipes.length || 1);
-      document.getElementById('avgPower').textContent = Math.round(avgPower / 1000) + 'kW';
+      const avgPower = state.recipes.reduce((s,r) => s + (r.power || 0), 0) / (state.recipes.length || 1);
+      document.getElementById('avgPower').textContent = (avgPower / 1000).toFixed(1) + 'kW';
       
-      const avgAuto = state.recipes.reduce((s,r) => s + r.automation, 0) / (state.recipes.length || 1);
+      const avgAuto = state.recipes.reduce((s,r) => s + (r.automation || 0), 0) / (state.recipes.length || 1);
       document.getElementById('avgAutomation').textContent = Math.round(avgAuto) + '%';
     }
     
@@ -224,17 +358,62 @@
       });
       
       // 切换到 SOP 标签页
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById('sop').classList.add('active');
-      document.querySelectorAll('.tab')[5].classList.add('active');
+      switchTabDirect('sop');
       
       // 渲染 SOP
-      renderSOP(state.selected.profile);
+      renderSOP(state.selected.profile || state.selected);
     }
     
+    function switchTabDirect(id){
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab')[id === 'dimensions' ? 1 : id === 'sop' ? 2 : 0].classList.add('active');
+      document.getElementById(id).classList.add('active');
+    }
+    
+    // ============ 维度网络渲染 ============
+    function renderDimensions(){
+      const container = document.getElementById('dimensionGrid');
+      
+      container.innerHTML = Object.entries(state.dimensions).map(([dimName, subdims]) => `
+        <div class="dimension-card">
+          <h3>${getDimensionIcon(dimName)} ${dimName}</h3>
+          <div class="dimension-tree">
+            ${Object.entries(subdims).map(([subName, values]) => `
+              <div class="tree-item" onclick="toggleTreeItem(this)">
+                <div class="tree-item-label">
+                  <span>${subName}</span>
+                  <span class="tree-item-count">${values.length}</span>
+                </div>
+                <div class="tree-children">
+                  ${values.map(v => `<span class="tag tag-primary">${v}</span>`).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function getDimensionIcon(dimName){
+      const icons = {
+        '场景维度': '🏢',
+        '商业维度': '💰',
+        '体验维度': '🌶️',
+        '地域维度': '🗺️',
+        '复杂度维度': '📐',
+        '健康合规': '🏥'
+      };
+      return icons[dimName] || '📊';
+    }
+    
+    function toggleTreeItem(el){
+      el.classList.toggle('expanded');
+    }
+    
+    // ============ SOP 渲染 ============
     function renderSOP(profile){
-      document.getElementById('sopRecipeName').textContent = profile.meta?.name || '未命名';
+      document.getElementById('sopRecipeName').textContent = profile.name || profile.meta?.name || '未命名';
       
       // 绘制功率曲线
       const controls = profile.timeline?.controls || [];
@@ -243,11 +422,11 @@
       if(controls.length === 0){
         svg.innerHTML = '<text x="400" y="150" text-anchor="middle" fill="#999">暂无功率数据</text>';
       }else{
-        // 计算坐标
-        const maxTime = Math.max(...controls.map(c => c.t), 1);
+        const maxTime = Math.max(...controls.map(c => c.t || c.time || 0), 1);
         const points = controls.map(c => {
-          const x = (c.t / maxTime) * 780 + 20;
-          const y = 280 - (c.power / 12000) * 260;
+          const t = c.t || c.time || 0;
+          const x = (t / maxTime) * 780 + 20;
+          const y = 280 - ((c.power || 0) / 12000) * 260;
           return `${x},${y}`;
         }).join(' ');
         
@@ -259,9 +438,10 @@
           <text x="780" y="285" fill="#999" font-size="12">${maxTime}s</text>
           <polyline points="${points}" class="power-line"/>
           ${controls.map((c, i) => {
-            const x = (c.t / maxTime) * 780 + 20;
-            const y = 280 - (c.power / 12000) * 260;
-            return `<circle cx="${x}" cy="${y}" r="6" class="power-point"><title>${c.t}s: ${c.power}W - ${c.commands}</title></circle>`;
+            const t = c.t || c.time || 0;
+            const x = (t / maxTime) * 780 + 20;
+            const y = 280 - ((c.power || 0) / 12000) * 260;
+            return `<circle cx="${x}" cy="${y}" r="6" class="power-point"><title>${t}s: ${c.power}W - ${c.commands || ''}</title></circle>`;
           }).join('')}
         `;
       }
@@ -269,24 +449,9 @@
       // 渲染时间轴
       const timeline = document.getElementById('timeline');
       const events = [
-        ...(profile.timeline?.controls || []).map(c => ({
-          t: c.t,
-          text: c.commands,
-          type: 'control',
-          tag: '功率控制'
-        })),
-        ...(profile.timeline?.manual_ops || []).map(c => ({
-          t: c.t,
-          text: c.text,
-          type: 'manual',
-          tag: '手动'
-        })),
-        ...(profile.timeline?.auto_dosing || []).map(c => ({
-          t: c.t,
-          text: c.text,
-          type: 'auto',
-          tag: '自动'
-        }))
+        ...(profile.timeline?.controls || []).map(c => ({ t: c.t || c.time || 0, text: c.commands || '', type: 'control', tag: '功率' })),
+        ...(profile.timeline?.manual_ops || []).map(c => ({ t: c.t || 0, text: c.text || '', type: 'manual', tag: '手动' })),
+        ...(profile.timeline?.auto_dosing || []).map(c => ({ t: c.t || 0, text: c.text || '', type: 'auto', tag: '自动' }))
       ].sort((a, b) => a.t - b.t);
       
       timeline.innerHTML = events.map(e => `
@@ -303,7 +468,7 @@
     // ============ 初始化 ============
     window.onload = function(){
       loadRecipes();
-      console.log('✅ V6 SOP 时间轴已加载');
+      console.log('✅ V6 关系分析系统已加载');
     };
   </script>
 </body>
