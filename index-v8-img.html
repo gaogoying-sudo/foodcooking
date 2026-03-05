@@ -27,8 +27,8 @@
     .btn{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;padding:12px 32px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600;width:100%;margin-top:20px;transition:opacity 0.2s}
     .btn:hover{opacity:0.9}
     .btn:disabled{background:#ccc;cursor:not-allowed}
-    .result{display:block;margin-top:20px;opacity:0.3;pointer-events:none}
-    .result.active{opacity:1;pointer-events:auto}
+    .result{display:none;margin-top:20px}
+    .result.show{display:block}
     .result h3{font-size:18px;margin-bottom:16px;color:var(--dark);display:flex;align-items:center;gap:8px}
     .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
     .info-item{background:#f8f9fa;border-radius:8px;padding:12px}
@@ -468,7 +468,7 @@
       console.log('[DEBUG] displayResult called with:', result);
       
       // 激活结果区域
-      document.getElementById('result').classList.add('active');
+      document.getElementById('result').classList.add('show');
       document.getElementById('result').style.display = 'block';
 
       // 基础信息
