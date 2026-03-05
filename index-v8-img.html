@@ -187,7 +187,7 @@
         },
         description: '经典湘菜，五花肉切片煸炒出油，青辣椒切块爆炒，色泽红亮，香气扑鼻，口感鲜辣下饭。'
       },
-      useMock: true // 设置为 true 使用模拟数据测试，false 调用真实 API
+      useMock: false // 设置为 true 使用模拟数据测试，false 调用真实 API
     };
 
     let selectedFile = null;
@@ -523,12 +523,25 @@
 
     // 匹配菜谱
     function matchRecipe(result) {
+      console.log('[DEBUG] matchRecipe called');
+      console.log('[DEBUG] referenceRecipes:', CONFIG.referenceRecipes);
+      console.log('[DEBUG] dish_name:', result.dish_name);
+      
       const dishName = result.dish_name || '';
-      const matched = CONFIG.referenceRecipes.find(r =>
-        r.name.includes(dishName) || dishName.includes(r.name)
-      );
+      
+      // 安全检查
+      if (!CONFIG.referenceRecipes || !Array.isArray(CONFIG.referenceRecipes)) {
+        console.warn('[DEBUG] referenceRecipes is not available');
+        return { matched: false };
+      }
+      
+      const matched = CONFIG.referenceRecipes.find(r => {
+        if (!r || !r.name) return false;
+        return r.name.includes(dishName) || dishName.includes(r.name);
+      });
 
       if (matched) {
+        console.log('[DEBUG] Matched recipe:', matched);
         return {
           matched: true,
           recipe_id: matched.id,
@@ -539,6 +552,7 @@
         };
       }
 
+      console.log('[DEBUG] No match found');
       return { matched: false };
     }
 
