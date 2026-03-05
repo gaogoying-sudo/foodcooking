@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>维度配置管理工具 V11</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--primary:#667eea;--secondary:#764ba2;--success:#28a745;--warning:#ffc107;--danger:#dc3545}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:#f5f6fa;padding:20px}
+    .container{max-width:1400px;margin:0 auto}
+    .header{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:24px;border-radius:12px;margin-bottom:20px}
+    .header h1{font-size:28px;margin-bottom:8px}
+    .header p{opacity:0.9}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+    .stat-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .stat-value{font-size:32px;font-weight:700;color:var(--primary);margin-bottom:8px}
+    .stat-label{font-size:13px;color:#666}
+    .tabs{display:flex;gap:8px;margin-bottom:20px}
+    .tab{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;background:#f0f0f0;color:#666}
+    .tab.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+    .content{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .search-box{display:flex;gap:12px;margin-bottom:20px}
+    .search-input{flex:1;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
+    .search-input:focus{outline:none;border-color:var(--primary)}
+    .btn{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+    .filter-group{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+    .filter-select{padding:10px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
+    .dimension-table{width:100%;border-collapse:collapse}
+    .dimension-table th,.dimension-table td{padding:12px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:13px}
+    .dimension-table th{background:#f8f9fa;font-weight:600;color:#666}
+    .dimension-table tr:hover{background:#f8f9fa}
+    .tag{padding:4px 10px;border-radius:12px;font-size:11px;display:inline-block}
+    .tag-demand{background:rgba(102,126,234,0.1);color:var(--primary)}
+    .tag-delivery{background:rgba(40,167,69,0.1);color:var(--success)}
+    .tag-control{background:rgba(255,193,7,0.1);color:var(--warning)}
+    .badge{padding:2px 8px;border-radius:8px;font-size:10px;background:#e0e0e0;color:#666}
+    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000}
+    .modal{background:#fff;border-radius:12px;max-width:900px;width:90%;max-height:90vh;overflow-y:auto}
+    .modal-header{padding:20px;border-bottom:2px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff}
+    .modal-title{font-size:20px;font-weight:700}
+    .modal-close{background:none;border:none;font-size:28px;cursor:pointer;color:#999}
+    .modal-body{padding:20px}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px}
+    .form-group{margin-bottom:16px}
+    .form-label{display:block;font-size:13px;font-weight:600;color:#666;margin-bottom:8px}
+    .form-input{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
+    .form-input:focus{outline:none;border-color:var(--primary)}
+    .form-textarea{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;min-height:100px;resize:vertical}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 维度配置管理工具 V11</h1>
+      <p>管理 95 个维度字典 · 支持增删改查 · 导出导入</p>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="totalDimensions">95</div>
+        <div class="stat-label">总维度数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="demandCount">35</div>
+        <div class="stat-label">需求端维度</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="deliveryCount">35</div>
+        <div class="stat-label">交付端维度</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="controlCount">25</div>
+        <div class="stat-label">控制变量维度</div>
+      </div>
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('all')">全部维度</div>
+      <div class="tab" onclick="switchTab('demand')">需求端</div>
+      <div class="tab" onclick="switchTab('delivery')">交付端</div>
+      <div class="tab" onclick="switchTab('control')">控制变量</div>
+    </div>
+    
+    <div class="content">
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜索维度名称、ID、定义..." id="searchInput">
+        <button class="btn btn-primary" onclick="searchDimensions()">🔍 搜索</button>
+        <button class="btn btn-primary" onclick="exportData()">📥 导出</button>
+        <button class="btn btn-primary" onclick="showAddModal()">➕ 新增</button>
+      </div>
+      
+      <div class="filter-group">
+        <select class="filter-select" id="domainFilter" onchange="filterDimensions()">
+          <option value="">全部域</option>
+          <option value="需求端">需求端</option>
+          <option value="交付端">交付端</option>
+          <option value="控制变量">控制变量</option>
+        </select>
+        <select class="filter-select" id="typeFilter" onchange="filterDimensions()">
+          <option value="">全部类型</option>
+          <option value="枚举">枚举</option>
+          <option value="数值">数值</option>
+          <option value="布尔">布尔</option>
+          <option value="文本">文本</option>
+          <option value="多选">多选</option>
+        </select>
+      </div>
+      
+      <table class="dimension-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>中文名</th>
+            <th>英文名</th>
+            <th>域</th>
+            <th>类型</th>
+            <th>默认值</th>
+            <th>权重</th>
+            <th>UI 组件</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="dimensionTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- 详情模态框 -->
+  <div class="modal-overlay" id="detailModal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="detailTitle">维度详情</h3>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="detailBody"></div>
+    </div>
+  </div>
+
+  <script>
+    let dimensions = [];
+    let filteredDimensions = [];
+    let currentTab = 'all';
+
+    // 加载维度数据
+    async function loadDimensions() {
+      try {
+        const res = await fetch('data/dimension-dictionary-full.json');
+        const data = await res.json();
+        dimensions = data.dimensions;
+        filteredDimensions = dimensions;
+        updateStats();
+        renderTable();
+      } catch (e) {
+        console.error('加载失败:', e);
+      }
+    }
+
+    // 更新统计
+    function updateStats() {
+      document.getElementById('totalDimensions').textContent = dimensions.length;
+      document.getElementById('demandCount').textContent = dimensions.filter(d => d.domain === '需求端').length;
+      document.getElementById('deliveryCount').textContent = dimensions.filter(d => d.domain === '交付端').length;
+      document.getElementById('controlCount').textContent = dimensions.filter(d => d.domain === '控制变量').length;
+    }
+
+    // 切换标签
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      filterDimensions();
+    }
+
+    // 筛选维度
+    function filterDimensions() {
+      const domain = document.getElementById('domainFilter').value;
+      const type = document.getElementById('typeFilter').value;
+      
+      filteredDimensions = dimensions.filter(d => {
+        if (currentTab !== 'all' && d.domain !== getDomainByTab(currentTab)) return false;
+        if (domain && d.domain !== domain) return false;
+        if (type && d.value_type !== type) return false;
+        return true;
+      });
+      
+      renderTable();
+    }
+
+    function getDomainByTab(tab) {
+      if (tab === 'demand') return '需求端';
+      if (tab === 'delivery') return '交付端';
+      if (tab === 'control') return '控制变量';
+      return '';
+    }
+
+    // 搜索
+    function searchDimensions() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      if (!query) {
+        filteredDimensions = dimensions;
+      } else {
+        filteredDimensions = dimensions.filter(d => 
+          d.dimension_name_cn.toLowerCase().includes(query) ||
+          d.dimension_name_en.toLowerCase().includes(query) ||
+          d.dimension_id.toLowerCase().includes(query) ||
+          d.definition.toLowerCase().includes(query)
+        );
+      }
+      renderTable();
+    }
+
+    // 渲染表格
+    function renderTable() {
+      const tbody = document.getElementById('dimensionTableBody');
+      tbody.innerHTML = filteredDimensions.slice(0, 100).map(d => `
+        <tr>
+          <td><span class="badge">${d.dimension_id}</span></td>
+          <td><strong>${d.dimension_name_cn}</strong></td>
+          <td>${d.dimension_name_en}</td>
+          <td><span class="tag tag-${getDomainClass(d.domain)}">${d.domain}</span></td>
+          <td>${d.value_type}</td>
+          <td>${formatValue(d.default_value)}</td>
+          <td>${d.weight || '-'}</td>
+          <td>${d.ui_component || '-'}</td>
+          <td>
+            <button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="showDetail('${d.dimension_id}')">查看</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function getDomainClass(domain) {
+      if (domain === '需求端') return 'demand';
+      if (domain === '交付端') return 'delivery';
+      return 'control';
+    }
+
+    function formatValue(val) {
+      if (val === null || val === undefined) return '-';
+      if (Array.isArray(val)) return val.join(',');
+      return val;
+    }
+
+    // 显示详情
+    function showDetail(id) {
+      const d = dimensions.find(x => x.dimension_id === id);
+      if (!d) return;
+      
+      document.getElementById('detailTitle').textContent = `${d.dimension_name_cn} (${d.dimension_id})`;
+      document.getElementById('detailBody').innerHTML = `
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">中文名</label>
+            <div class="form-input">${d.dimension_name_cn}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">英文名</label>
+            <div class="form-input">${d.dimension_name_en}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">所属域</label>
+            <div class="form-input">${d.domain}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">值类型</label>
+            <div class="form-input">${d.value_type}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">定义</label>
+            <textarea class="form-textarea" rows="3">${d.definition}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">可选值</label>
+            <textarea class="form-textarea" rows="3">${Array.isArray(d.allowed_values) ? d.allowed_values.join(', ') : 'N/A'}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">数据来源</label>
+            <div class="form-input">${(d.source_fields || []).join(', ')}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">解析方式</label>
+            <div class="form-input">${d.parse_method}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">UI 组件</label>
+            <div class="form-input">${d.ui_component || '-'}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">默认值</label>
+            <div class="form-input">${formatValue(d.default_value)}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">权重</label>
+            <div class="form-input">${d.weight || '-'}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">备注</label>
+            <textarea class="form-textarea" rows="2">${d.remarks || '-'}</textarea>
+          </div>
+        </div>
+      `;
+      document.getElementById('detailModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').style.display = 'none';
+    }
+
+    function showAddModal() {
+      alert('新增功能开发中...');
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(dimensions, null, 2);
+      const blob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dimension-dictionary-export.json';
+      a.click();
+    }
+
+    // 初始化
+    loadDimensions();
+  </script>
+</body>
+</html>
