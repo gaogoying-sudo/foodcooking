@@ -234,24 +234,54 @@
 
     // 处理文件
     function handleFile(file) {
+      console.log('[DEBUG] handleFile called with:', file);
+      console.log('[DEBUG] File type:', file?.type);
+      console.log('[DEBUG] File size:', file?.size);
+      
       if (!file || !file.type.startsWith('image/')) {
+        console.error('[DEBUG] Invalid file type');
         showError('请选择图片文件');
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
+        console.error('[DEBUG] File too large');
         showError('图片大小不能超过 10MB');
         return;
       }
 
       selectedFile = file;
       const reader = new FileReader();
+      
       reader.onload = function(e) {
+        console.log('[DEBUG] FileReader onload called');
+        console.log('[DEBUG] Result length:', e.target.result?.length);
+        
         imageBase64 = e.target.result;
-        document.getElementById('previewImg').src = imageBase64;
-        document.getElementById('preview').style.display = 'block';
-        document.getElementById('recognizeBtn').disabled = false;
+        
+        const previewImg = document.getElementById('previewImg');
+        const preview = document.getElementById('preview');
+        const recognizeBtn = document.getElementById('recognizeBtn');
+        
+        console.log('[DEBUG] Setting previewImg src...');
+        previewImg.src = imageBase64;
+        
+        console.log('[DEBUG] Setting preview display:block');
+        preview.style.display = 'block';
+        
+        console.log('[DEBUG] Enabling recognize button');
+        recognizeBtn.disabled = false;
+        
         hideError();
+        
+        console.log('[DEBUG] File handling completed');
       };
+      
+      reader.onerror = function(error) {
+        console.error('[DEBUG] FileReader error:', error);
+        showError('图片读取失败，请重试');
+      };
+      
+      console.log('[DEBUG] Starting FileReader...');
       reader.readAsDataURL(file);
     }
 
