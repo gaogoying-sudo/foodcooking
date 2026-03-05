@@ -281,8 +281,12 @@
       }
     }
 
-    // 调用 Qwen API
+    // 调用 Qwen API（直接调用 + 详细错误处理）
     async function callQwenAPI(imageBase64) {
+      console.log('[DEBUG] 开始调用 API...');
+      console.log('[DEBUG] Image length:', imageBase64.length);
+      console.log('[DEBUG] API URL:', CONFIG.apiUrl);
+
       const prompt = `你是一位专业的菜品识别专家。请分析这张图片中的菜品，并严格按照以下 JSON 格式返回结果：
 
 {
@@ -324,25 +328,53 @@
         temperature: 0.3
       };
 
-      const response = await fetch(CONFIG.apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${CONFIG.apiKey}`
-        },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const response = await fetch(CONFIG.apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${CONFIG.apiKey}`
+          },
+          body: JSON.stringify(payload)
+        });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`API 请求失败：${error.message || response.statusText}`);
+        console.log('[DEBUG] Response status:', response.status);
+
+        if (!response.ok) {
+          let errorMsg = `HTTP ${response.status}`;
+          try {
+            const errorData = await response.json();
+            console.error('[DEBUG] Error response:', errorData);
+            errorMsg = errorData.error?.message || errorData.message || response.statusText;
+          } catch (e) {
+            console.error('[DEBUG] Could not parse error response');
+          }
+          throw new Error(`API 请求失败：${errorMsg}`);
+        }
+
+        const data = await response.json();
+        console.log('[DEBUG] Success response:', data);
+
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+          throw new Error('API 返回数据格式错误');
+        }
+
+        const content = data.choices[0].message.content;
+        console.log('[DEBUG] Content:', content);
+
+        // 解析 JSON
+        return parseRecognitionResult(content);
+
+      } catch (error) {
+        console.error('[DEBUG] API call failed:', error);
+        
+        // 特殊处理 CORS 错误
+        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+          throw new Error('网络错误：可能是 CORS 跨域限制。请在本地测试或配置后端代理。');
+        }
+        
+        throw error;
       }
-
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-
-      // 解析 JSON
-      return parseRecognitionResult(content);
     }
 
     // 解析识别结果
