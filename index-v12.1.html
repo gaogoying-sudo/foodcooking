@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>智能菜谱 R&D 系统 V12 - 定版</title>
+  <title>智能菜谱 R&D 系统 V12.1 - 修复版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -68,22 +68,43 @@
     .stat-value{font-size:32px;font-weight:700;margin-bottom:8px}
     .stat-label{font-size:13px;opacity:0.9}
     
-    /* 图片识别布局 */
-    .ai-recognize-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
-    .ai-left{}
-    .ai-right{}
+    /* AI 识别布局 - V12.1 修复 */
+    .ai-recognize-layout{display:block}
+    .ai-top-section{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
     .upload-area{border:2px dashed var(--primary);border-radius:12px;padding:60px 20px;text-align:center;cursor:pointer;transition:all 0.3s;background:#f8f9ff}
     .upload-area:hover{border-color:var(--secondary);background:#f0f2ff;transform:translateY(-2px)}
     .upload-area.dragover{border-color:var(--secondary);background:#e8ebff}
     .upload-icon{font-size:64px;margin-bottom:16px}
     .upload-text{font-size:16px;color:var(--primary);margin-bottom:8px;font-weight:600}
     .upload-hint{font-size:13px;color:#999}
-    .preview{margin-top:20px;border-radius:8px;overflow:hidden;display:none;position:relative}
+    .preview{margin-top:20px;border-radius:8px;overflow:hidden;display:block}
     .preview img{width:100%;max-height:400px;object-fit:contain}
     .btn{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;padding:12px 32px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600;width:100%;margin-top:20px;transition:opacity 0.2s}
     .btn:hover{opacity:0.9}
     .btn:disabled{background:#ccc;cursor:not-allowed}
     .btn-small{padding:8px 16px;font-size:13px;width:auto}
+    
+    /* 结果展示区 */
+    .result-section{background:#f8f9fa;border-radius:12px;padding:20px}
+    .result-header{font-size:18px;font-weight:700;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+    .info-item{background:#fff;border-radius:8px;padding:12px}
+    .info-label{font-size:12px;color:#999;margin-bottom:4px}
+    .info-value{font-size:14px;color:#333;font-weight:600}
+    
+    /* 维度展示 */
+    .dimensions-full-layout{margin-top:24px}
+    .dimensions-section-title{font-size:16px;font-weight:700;color:#333;margin:24px 0 12px 0;display:flex;align-items:center;gap:8px}
+    .dimensions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .dimension-card{background:#fff;border-radius:12px;padding:16px;border-left:4px solid var(--primary);box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .dimension-card h4{font-size:14px;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:6px;font-weight:600}
+    .dimension-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e0e0e0}
+    .dimension-item:last-child{border-bottom:none}
+    .dimension-item-label{font-size:12px;color:#666}
+    .dimension-item-value{font-size:13px;color:#333;font-weight:600}
+    .dimension-tag{padding:4px 10px;border-radius:12px;font-size:11px;background:rgba(102,126,234,0.1);color:var(--primary)}
+    .dimension-bar{width:100%;height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;margin-top:4px}
+    .dimension-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:3px}
     
     /* 进度条 */
     .progress-container{margin-top:16px;display:none}
@@ -92,24 +113,13 @@
     .progress-text{font-size:12px;color:#666;margin-top:8px;text-align:center}
     
     /* Token 消耗显示 */
-    .token-usage{background:#f8f9fa;border-radius:8px;padding:12px;margin-top:16px;display:none}
+    .token-usage{background:#fff;border-radius:8px;padding:12px;margin-top:16px;display:none;border:2px solid #e0e0e0}
     .token-usage.show{display:block}
     .token-usage-header{font-size:13px;font-weight:600;color:#666;margin-bottom:8px;display:flex;justify-content:space-between}
     .token-usage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .token-usage-item{background:#fff;border-radius:6px;padding:8px;text-align:center}
+    .token-usage-item{background:#f8f9fa;border-radius:6px;padding:8px;text-align:center}
     .token-usage-value{font-size:18px;font-weight:700;color:var(--primary)}
     .token-usage-label{font-size:11px;color:#999;margin-top:4px}
-    
-    /* 维度展示 - 完整布局 */
-    .dimensions-full-layout{margin-top:24px}
-    .dimensions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px}
-    .dimension-card{background:#f8f9fa;border-radius:12px;padding:16px;border-left:4px solid var(--primary)}
-    .dimension-card h4{font-size:14px;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:6px;font-weight:600}
-    .dimension-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e0e0e0}
-    .dimension-item:last-child{border-bottom:none}
-    .dimension-item-label{font-size:12px;color:#666}
-    .dimension-item-value{font-size:13px;color:#333;font-weight:600}
-    .dimension-tag{padding:4px 10px;border-radius:12px;font-size:11px;background:rgba(102,126,234,0.1);color:var(--primary)}
     
     /* 瀑布流 */
     .waterfall-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px}
@@ -127,7 +137,7 @@
     .tag-manual{background:rgba(255,193,7,0.1);color:var(--warning)}
     .tag-auto{background:rgba(40,167,69,0.1);color:var(--success)}
     
-    /* 维度管理器内嵌 */
+    /* 维度管理器 */
     .dimension-manager-embedded{background:#fff;border-radius:12px;padding:24px}
     .dm-search-box{display:flex;gap:12px;margin-bottom:20px}
     .dm-search-input{flex:1;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
@@ -145,19 +155,23 @@
     .modal-title{font-size:20px;font-weight:700;color:var(--dark)}
     .modal-close{background:none;border:none;font-size:28px;cursor:pointer;color:#999}
     .modal-body{padding:20px}
+    .modal-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .modal-detail-item{background:#f8f9fa;border-radius:8px;padding:16px}
+    .modal-detail-label{font-size:12px;color:#999;margin-bottom:4px}
+    .modal-detail-value{font-size:16px;font-weight:700;color:#333}
     
     /* 错误提示 */
     .error{background:#fff3f3;border:1px solid #ffcdd2;color:#d32f2f;padding:12px;border-radius:8px;margin-top:16px;display:none}
     
     /* 响应式 */
-    @media(max-width:1200px){:root{--sidebar-width:220px}.ai-recognize-layout{grid-template-columns:1fr}}
-    @media(max-width:768px){.ai-recognize-layout{grid-template-columns:1fr}.header-search{width:200px}}
+    @media(max-width:1200px){:root{--sidebar-width:220px}.ai-top-section{grid-template-columns:1fr}}
+    @media(max-width:768px){.ai-top-section{grid-template-columns:1fr}.header-search{width:200px}}
   </style>
 </head>
 <body>
   <!-- 版本切换 -->
   <div class="version-switcher">
-    <button class="version-btn" onclick="toggleVersionDropdown()">📦 V12 定版 ▼</button>
+    <button class="version-btn" onclick="toggleVersionDropdown()">📦 V12.1 修复版 ▼</button>
     <div class="version-dropdown" id="versionDropdown">
       <a href="index.html">V1 极速版</a>
       <a href="index-v2.html">V2 精简版</a>
@@ -171,14 +185,15 @@
       <a href="index-v9.html">V9 AI 识别</a>
       <a href="index-v10.html">V10 完整版</a>
       <a href="index-v11.html">V11 维度版</a>
-      <a href="index-v12.html" class="active">V12 定版 <span class="badge">NEW</span></a>
+      <a href="index-v12.html">V12 定版</a>
+      <a href="index-v12.1.html" class="active">V12.1 修复版 <span class="badge">NEW</span></a>
     </div>
   </div>
 
   <!-- 顶部导航 -->
   <div class="header">
     <div class="header-left">
-      <div class="header-logo">🍳 智能菜谱 R&D 系统 <span class="version">V12</span></div>
+      <div class="header-logo">🍳 智能菜谱 R&D 系统 <span class="version">V12.1</span></div>
       <input type="text" class="header-search" placeholder="搜索菜谱..." id="globalSearch">
     </div>
     <div class="header-right">
@@ -229,7 +244,7 @@
   
   <!-- 主内容区 -->
   <div class="main-content">
-    <!-- 模块 1: AI 图片识别 -->
+    <!-- 模块 1: AI 图片识别 V12.1 -->
     <div class="module-container active" id="module-ai-recognize">
       <div class="content-card">
         <div class="content-header">
@@ -239,9 +254,10 @@
           </div>
         </div>
         
-        <div class="ai-recognize-layout">
+        <!-- 上半部分：上传 + 结果 -->
+        <div class="ai-top-section">
           <!-- 左侧：上传区 -->
-          <div class="upload-section">
+          <div>
             <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
               <div class="upload-icon">📷</div>
               <div class="upload-text">点击或拖拽上传图片</div>
@@ -285,34 +301,34 @@
           </div>
           
           <!-- 右侧：结果展示 -->
-          <div class="result" id="result" style="display:none">
-            <h3 style="font-size:18px;margin-bottom:16px;color:#333">✅ 识别结果</h3>
+          <div class="result-section" id="result" style="display:none">
+            <div class="result-header">✅ 识别结果</div>
             
-            <div class="info-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px">
-              <div class="info-item" style="background:#f8f9fa;border-radius:8px;padding:12px">
-                <div class="info-label" style="font-size:12px;color:#999;margin-bottom:4px">菜品名称</div>
-                <div class="info-value" id="dishName" style="font-size:14px;color:#333;font-weight:600">-</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">菜品名称</div>
+                <div class="info-value" id="dishName">-</div>
               </div>
-              <div class="info-item" style="background:#f8f9fa;border-radius:8px;padding:12px">
-                <div class="info-label" style="font-size:12px;color:#999;margin-bottom:4px">置信度</div>
-                <div class="info-value" id="confidence" style="font-size:14px;color:#333;font-weight:600">-</div>
+              <div class="info-item">
+                <div class="info-label">置信度</div>
+                <div class="info-value" id="confidence">-</div>
               </div>
-              <div class="info-item" style="background:#f8f9fa;border-radius:8px;padding:12px">
-                <div class="info-label" style="font-size:12px;color:#999;margin-bottom:4px">菜系</div>
-                <div class="info-value" id="cuisineType" style="font-size:14px;color:#333;font-weight:600">-</div>
+              <div class="info-item">
+                <div class="info-label">菜系</div>
+                <div class="info-value" id="cuisineType">-</div>
               </div>
-              <div class="info-item" style="background:#f8f9fa;border-radius:8px;padding:12px">
-                <div class="info-label" style="font-size:12px;color:#999;margin-bottom:4px">烹饪方式</div>
-                <div class="info-value" id="cookingMethod" style="font-size:14px;color:#333;font-weight:600">-</div>
+              <div class="info-item">
+                <div class="info-label">烹饪方式</div>
+                <div class="info-value" id="cookingMethod">-</div>
               </div>
-            </div>
-            
-            <!-- 完整维度展示 -->
-            <div class="dimensions-full-layout">
-              <h4 style="font-size:16px;margin-bottom:12px;color:#333">📊 完整维度分析 (95 个维度)</h4>
-              <div class="dimensions-grid" id="dimensionsGrid"></div>
             </div>
           </div>
+        </div>
+        
+        <!-- 下半部分：完整维度分析 -->
+        <div class="dimensions-full-layout" id="dimensionsSection" style="display:none">
+          <div class="dimensions-section-title">📊 完整维度分析 (95 个维度)</div>
+          <div class="dimensions-grid" id="dimensionsGrid"></div>
         </div>
       </div>
     </div>
@@ -387,7 +403,7 @@
     </div>
   </div>
   
-  <!-- 详情模态框 -->
+  <!-- 菜谱详情模态框 -->
   <div class="modal-overlay" id="recipeModal">
     <div class="modal">
       <div class="modal-header">
@@ -438,7 +454,7 @@
       });
     });
 
-    // ==================== AI 识别功能 ====================
+    // ==================== AI 识别功能 V12.1 ====================
     function handleFileSelect(event) {
       const file = event.target.files[0];
       handleFile(file);
@@ -479,10 +495,13 @@
         progressFill.style.width = '70%';progressText.textContent = '正在分析维度数据...';
         await new Promise(resolve => setTimeout(resolve, 500));
         
+        // 显示结果区域
         document.getElementById('result').style.display = 'block';
+        document.getElementById('dimensionsSection').style.display = 'block';
         displayResult(result);
+        displayDimensions(result);
         progressFill.style.width = '100%';progressText.textContent = '✅ 识别完成！';
-        document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('dimensionsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (error) {
         showError(error.message || '识别失败，请重试');
         progressContainer.style.display = 'none';
@@ -542,12 +561,15 @@
       document.getElementById('confidence').textContent = `${((result.confidence || 0.8) * 100).toFixed(1)}%`;
       document.getElementById('cuisineType').textContent = result.cuisine_type || '家常菜';
       document.getElementById('cookingMethod').textContent = result.cooking_method || '炒';
-      
+    }
+
+    function displayDimensions(result) {
       const dims = result.dimensions || {};
       const grid = document.getElementById('dimensionsGrid');
       
-      // 需求端维度
       let html = '';
+      
+      // 场景维度
       if (dims.scene) {
         html += `<div class="dimension-card"><h4>🎯 场景维度</h4>`;
         html += `<div class="dimension-item"><span class="dimension-item-label">用餐时段</span><span class="dimension-item-value">${dims.scene.meal_period || '-'}</span></div>`;
@@ -557,6 +579,8 @@
         html += `<div class="dimension-item"><span class="dimension-item-label">出餐要求</span><span class="dimension-item-value">${dims.scene.serving_speed_requirement || '-'}</span></div>`;
         html += `</div>`;
       }
+      
+      // 商业维度
       if (dims.business) {
         html += `<div class="dimension-card"><h4>💰 商业维度</h4>`;
         html += `<div class="dimension-item"><span class="dimension-item-label">价格带</span><span class="dimension-item-value">${dims.business.price_range || '-'}</span></div>`;
@@ -566,15 +590,23 @@
         html += `<div class="dimension-item"><span class="dimension-item-label">标准化要求</span><span class="dimension-item-value">${dims.business.standardization_requirement || '-'}</span></div>`;
         html += `</div>`;
       }
+      
+      // 体验维度
       if (dims.experience) {
         html += `<div class="dimension-card"><h4>👅 体验维度</h4>`;
         html += `<div class="dimension-item"><span class="dimension-item-label">味型</span><span class="dimension-tag">${dims.experience.flavor_type || '-'}</span></div>`;
-        html += `<div class="dimension-item"><span class="dimension-item-label">辣度</span><span class="dimension-item-value">${'⭐'.repeat(dims.experience.spiciness_level || 0)}</span></div>`;
-        html += `<div class="dimension-item"><span class="dimension-item-label">麻度</span><span class="dimension-item-value">${'⚡'.repeat(dims.experience.numbing_level || 0)}</span></div>`;
-        html += `<div class="dimension-item"><span class="dimension-item-label">咸度</span><span class="dimension-item-value">${'🧂'.repeat(dims.experience.saltiness_level || 0)}</span></div>`;
-        html += `<div class="dimension-item"><span class="dimension-item-label">锅气感</span><span class="dimension-item-value">${'🔥'.repeat(dims.experience.wok_hei_level || 0)}</span></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">辣度</span><span class="dimension-item-value">${'⭐'.repeat(dims.experience.spiciness_level || 0)}</span><div class="dimension-bar"><div class="dimension-bar-fill" style="width:${(dims.experience.spiciness_level || 0) * 16.67}%"></div></div></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">麻度</span><span class="dimension-item-value">${'⚡'.repeat(dims.experience.numbing_level || 0)}</span><div class="dimension-bar"><div class="dimension-bar-fill" style="width:${(dims.experience.numbing_level || 0) * 16.67}%"></div></div></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">咸度</span><span class="dimension-item-value">${'🧂'.repeat(dims.experience.saltiness_level || 0)}</span><div class="dimension-bar"><div class="dimension-bar-fill" style="width:${(dims.experience.saltiness_level || 0) * 16.67}%"></div></div></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">甜度</span><span class="dimension-item-value">${'🍬'.repeat(dims.experience.sweetness_level || 0)}</span><div class="dimension-bar"><div class="dimension-bar-fill" style="width:${(dims.experience.sweetness_level || 0) * 16.67}%"></div></div></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">锅气感</span><span class="dimension-item-value">${'🔥'.repeat(dims.experience.wok_hei_level || 0)}</span><div class="dimension-bar"><div class="dimension-bar-fill" style="width:${(dims.experience.wok_hei_level || 0) * 16.67}%"></div></div></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">干湿度</span><span class="dimension-item-value">${dims.experience.moisture_level || '-'}</span></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">口感</span><span class="dimension-item-value">${(dims.experience.texture || []).join(', ')}</span></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">饱腹感</span><span class="dimension-item-value">${dims.experience.satiety || '-'}</span></div>`;
         html += `</div>`;
       }
+      
+      // 地域维度
       if (dims.region) {
         html += `<div class="dimension-card"><h4>🌍 地域维度</h4>`;
         html += `<div class="dimension-item"><span class="dimension-item-label">国家菜系</span><span class="dimension-item-value">${dims.region.national_cuisine || '-'}</span></div>`;
@@ -584,7 +616,25 @@
         html += `</div>`;
       }
       
-      grid.innerHTML = html || '<div style="color:#999">暂无维度数据</div>';
+      // 人群与限制
+      if (dims.people) {
+        html += `<div class="dimension-card"><h4>👥 人群与限制</h4>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">人数规格</span><span class="dimension-item-value">${dims.people.portion_size || '-'}</span></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">饮食限制</span><span class="dimension-item-value">${(dims.people.dietary_restrictions || []).join(', ') || '无'}</span></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">过敏原</span><span class="dimension-item-value">${(dims.people.allergens || []).join(', ') || '无'}</span></div>`;
+        html += `</div>`;
+      }
+      
+      // 复杂度感知
+      if (dims.complexity) {
+        html += `<div class="dimension-card"><h4>⚙️ 复杂度感知</h4>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">感知复杂度</span><span class="dimension-item-value">${dims.complexity.perceived_complexity || '-'}</span></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">制作门槛</span><span class="dimension-item-value">${dims.complexity.perceived_difficulty || '-'}</span></div>`;
+        html += `<div class="dimension-item"><span class="dimension-item-label">等待成本</span><span class="dimension-item-value">${dims.complexity.perceived_wait_cost || '-'}</span></div>`;
+        html += `</div>`;
+      }
+      
+      grid.innerHTML = html || '<div style="color:#999;grid-column:1/-1;text-align:center;padding:40px">暂无维度数据</div>';
     }
 
     function clearRecognition() {
@@ -594,6 +644,7 @@
       document.getElementById('preview').style.display = 'none';
       document.getElementById('recognizeBtn').disabled = true;
       document.getElementById('result').style.display = 'none';
+      document.getElementById('dimensionsSection').style.display = 'none';
       document.getElementById('progressContainer').style.display = 'none';
       document.getElementById('tokenUsage').classList.remove('show');
       hideError();
@@ -602,31 +653,78 @@
     function showError(msg) {const errorEl = document.getElementById('error');errorEl.textContent = msg;errorEl.style.display = 'block';}
     function hideError() {document.getElementById('error').style.display = 'none';}
 
-    // ==================== 菜谱列表 ====================
+    // ==================== 菜谱列表 V12.1 ====================
     async function loadRecipeList() {
       try {
         const res = await fetch('data/recipes-full.json');
         const data = await res.json();
         CONFIG.recipes = data;
+        
         document.getElementById('totalRecipes').textContent = data.length;
         document.getElementById('totalCuisines').textContent = new Set(data.map(r => r.cuisine_type || '家常菜')).size;
         document.getElementById('avgCookTime').textContent = Math.round(data.reduce((sum, r) => sum + (r.cook_time || 0), 0) / data.length) + 's';
+        
         const grid = document.getElementById('recipeGrid');
-        grid.innerHTML = data.slice(0, 20).map(r => `<div class="recipe-card" style="border:2px solid #e0e0e0;border-radius:12px;overflow:hidden;cursor:pointer" onclick="showRecipeDetail(${r.id})"><div style="width:100%;height:160px;background:linear-gradient(135deg,#f0f0f0,#e0e0e0)"></div><div style="padding:16px"><div style="font-size:16px;font-weight:600;margin-bottom:8px">${r.name}</div><div style="display:flex;gap:12px;font-size:12px;color:#666;margin-bottom:12px"><span>⏱️ ${r.cook_time || '-'}s</span><span>⚡ ${r.max_power || '-'}W</span></div><div style="display:flex;gap:4px"><span class="dimension-tag">${r.cuisine_type || '家常菜'}</span></div></div></div>`).join('');
+        grid.innerHTML = data.map(r => `
+          <div class="recipe-card" style="border:2px solid #e0e0e0;border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--primary)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.12)'" onmouseout="this.style.borderColor='#e0e0e0';this.style.transform='translateY(0)';this.style.boxShadow='none'" onclick="showRecipeDetail(${r.id})">
+            <div style="width:100%;height:160px;background:linear-gradient(135deg,#f0f0f0,#e0e0e0);display:flex;align-items:center;justify-content:center;font-size:48px">🍳</div>
+            <div style="padding:16px">
+              <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:#333">${r.name}</div>
+              <div style="display:flex;gap:12px;font-size:12px;color:#666;margin-bottom:12px">
+                <span>⏱️ ${r.cook_time || '-'}s</span>
+                <span>⚡ ${r.max_power || '-'}W</span>
+                <span>👥 ${r.portion_size || '-'}</span>
+              </div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <span class="dimension-tag">${r.cuisine_type || '家常菜'}</span>
+                <span class="dimension-tag" style="background:rgba(40,167,69,0.1);color:#28a745">${r.complexity || '中等'}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
       } catch (e) {console.error('加载菜谱失败:', e);}
     }
 
     function showRecipeDetail(id) {
       const recipe = CONFIG.recipes.find(r => r.id === id);
       if (!recipe) return;
+      
       document.getElementById('modalTitle').textContent = recipe.name;
-      document.getElementById('modalBody').innerHTML = `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px"><div style="background:#f8f9fa;border-radius:8px;padding:12px"><div style="font-size:12px;color:#999">烹饪时长</div><div style="font-size:14px;font-weight:600">${recipe.cook_time || '-'}s</div></div><div style="background:#f8f9fa;border-radius:8px;padding:12px"><div style="font-size:12px;color:#999">最大功率</div><div style="font-size:14px;font-weight:600">${recipe.max_power || '-'}W</div></div></div>`;
+      document.getElementById('modalBody').innerHTML = `
+        <div class="modal-detail-grid">
+          <div class="modal-detail-item">
+            <div class="modal-detail-label">烹饪时长</div>
+            <div class="modal-detail-value">${recipe.cook_time || '-'}s</div>
+          </div>
+          <div class="modal-detail-item">
+            <div class="modal-detail-label">最大功率</div>
+            <div class="modal-detail-value">${recipe.max_power || '-'}W</div>
+          </div>
+          <div class="modal-detail-item">
+            <div class="modal-detail-label">菜系</div>
+            <div class="modal-detail-value">${recipe.cuisine_type || '-'}</div>
+          </div>
+          <div class="modal-detail-item">
+            <div class="modal-detail-label">复杂度</div>
+            <div class="modal-detail-value">${recipe.complexity || '-'}</div>
+          </div>
+          <div class="modal-detail-item">
+            <div class="modal-detail-label">份量规格</div>
+            <div class="modal-detail-value">${recipe.portion_size || '-'}</div>
+          </div>
+          <div class="modal-detail-item">
+            <div class="modal-detail-label">自动化率</div>
+            <div class="modal-detail-value">${recipe.automation_ratio || '-'}%</div>
+          </div>
+        </div>
+        ${recipe.description ? `<div style="margin-top:20px;padding:16px;background:#f8f9fa;border-radius:8px"><div style="font-size:12px;color:#999;margin-bottom:8px">菜品描述</div><div style="font-size:14px;color:#666;line-height:1.6">${recipe.description}</div></div>` : ''}
+      `;
       document.getElementById('recipeModal').classList.add('active');
     }
 
     function closeModal() {document.getElementById('recipeModal').classList.remove('active');}
 
-    // ==================== 瀑布流 ====================
+    // ==================== 瀑布流 V12.1 ====================
     function loadWaterfall() {
       const sampleData = [
         {id:1,name:'辣椒炒肉',cook_time:175,max_power:12000,steps:[{time:0,text:'热锅',type:'control',power:8000},{time:30,text:'下肉',type:'manual',power:12000},{time:90,text:'翻炒',type:'control',power:10000},{time:150,text:'调味',type:'manual',power:8000}]},
@@ -635,13 +733,13 @@
       
       const container = document.getElementById('waterfallContainer');
       container.innerHTML = sampleData.map(r => {
-        const powerData = r.steps.map(s => ({x: s.time, y: s.power}));
         return `
         <div class="waterfall-card">
           <h3>🍳 ${r.name}</h3>
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0">
             <div style="background:#fff;border-radius:8px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--primary)">${r.cook_time}s</div><div style="font-size:11px;color:#999">烹饪时长</div></div>
             <div style="background:#fff;border-radius:8px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--primary)">${r.max_power}W</div><div style="font-size:11px;color:#999">最大功率</div></div>
+            <div style="background:#fff;border-radius:8px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--primary)">${r.steps.length}</div><div style="font-size:11px;color:#999">步骤数</div></div>
           </div>
           <div class="power-chart"><canvas id="powerChart${r.id}"></canvas></div>
           <div class="timeline-waterfall">
@@ -669,19 +767,22 @@
       }, 100);
     }
 
-    // ==================== 维度网络 ====================
+    // ==================== 维度网络 V12.1 ====================
     function loadDimensionNetwork() {
       const dimensions = {
-        scene: ['用餐时段', '消费场景', '业态场地', '高峰压力', '出餐要求'],
-        business: ['价格带', '成本敏感度', '毛利属性', '复购频次', '标准化要求'],
-        experience: ['味型', '辣度', '麻度', '咸度', '甜度', '锅气感'],
-        region: ['国家菜系', '中国区域', '细分菜系', '风味标签']
+        scene: {name:'场景维度',icon:'🎯',items:['用餐时段', '消费场景', '业态场地', '高峰压力', '出餐要求']},
+        business: {name:'商业维度',icon:'💰',items:['价格带', '成本敏感度', '毛利属性', '复购频次', '标准化要求']},
+        experience: {name:'体验维度',icon:'👅',items:['味型', '辣度', '麻度', '咸度', '甜度', '锅气感']},
+        region: {name:'地域维度',icon:'🌍',items:['国家菜系', '中国区域', '细分菜系', '风味标签']},
+        people: {name:'人群与限制',icon:'👥',items:['人数规格', '饮食限制', '过敏原', '特殊偏好']},
+        complexity: {name:'复杂度感知',icon:'⚙️',items:['感知复杂度', '制作门槛', '等待成本']}
       };
+      
       const grid = document.getElementById('dimensionNetworkGrid');
-      grid.innerHTML = Object.entries(dimensions).map(([key, dims]) => `
-        <div class="dimension-card" style="background:#f8f9fa;border-radius:12px;padding:16px;border-left:4px solid var(--primary)">
-          <h4 style="font-size:14px;color:var(--primary);margin-bottom:12px;font-weight:600">${key === 'scene' ? '🎯 场景维度' : key === 'business' ? '💰 商业维度' : key === 'experience' ? '👅 体验维度' : '🌍 地域维度'}</h4>
-          ${dims.map(d => `<div class="dimension-item" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e0e0e0"><span style="font-size:12px;color:#666">${d}</span><span class="dimension-tag">0</span></div>`).join('')}
+      grid.innerHTML = Object.entries(dimensions).map(([key, dim]) => `
+        <div class="dimension-card" style="background:#fff;border-radius:12px;padding:16px;border-left:4px solid var(--primary);box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+          <h4 style="font-size:14px;color:var(--primary);margin-bottom:12px;font-weight:600">${dim.icon} ${dim.name}</h4>
+          ${dim.items.map(d => `<div class="dimension-item" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e0e0e0"><span style="font-size:12px;color:#666">${d}</span><span class="dimension-tag">0</span></div>`).join('')}
         </div>
       `).join('');
     }
