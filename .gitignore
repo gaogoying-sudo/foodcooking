@@ -15,3 +15,4 @@ node_modules/
 
 # 锁定文件
 package-lock.json
+.vercel
