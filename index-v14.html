@@ -503,7 +503,7 @@
     function switchModule(moduleId) {
       document.querySelectorAll('.module-container').forEach(m => m.classList.remove('active'));
       document.getElementById('module-' + moduleId)?.classList.add('active');
-      if (moduleId === 'recipe-list') loadRecipeListVirtual();
+      if (moduleId === 'recipe-list') loadRecipeList();
       if (moduleId === 'waterfall') loadWaterfall();
       if (moduleId === 'dimension-network') loadDimensionNetwork();
       if (moduleId === 'dimension-manager') loadDimensionManager();
@@ -633,16 +633,24 @@
       CONFIG.tokenStats.output += output;
       CONFIG.tokenStats.total += input + output;
       
-      document.getElementById('tokenInput').textContent = CONFIG.tokenStats.input.toLocaleString();
-      document.getElementById('tokenOutput').textContent = CONFIG.tokenStats.output.toLocaleString();
-      document.getElementById('tokenTotal').textContent = CONFIG.tokenStats.total.toLocaleString();
+      // Top Bar Token 统计（可选）
+      const tokenTotalEl = document.getElementById('tokenTotal');
+      if (tokenTotalEl) tokenTotalEl.textContent = CONFIG.tokenStats.total.toLocaleString();
       
-      document.getElementById('lastInput').textContent = input.toLocaleString();
-      document.getElementById('lastOutput').textContent = output.toLocaleString();
-      document.getElementById('lastTotal').textContent = (input + output).toLocaleString();
-      document.getElementById('tokenUsage').classList.add('show');
+      // Token 历史弹窗
+      const lastInputEl = document.getElementById('lastInput');
+      const lastOutputEl = document.getElementById('lastOutput');
+      const lastTotalEl = document.getElementById('lastTotal');
+      if (lastInputEl) lastInputEl.textContent = input.toLocaleString();
+      if (lastOutputEl) lastOutputEl.textContent = output.toLocaleString();
+      if (lastTotalEl) lastTotalEl.textContent = (input + output).toLocaleString();
       
-      document.getElementById('statTokenUsage').textContent = CONFIG.tokenStats.total.toLocaleString();
+      const tokenUsageEl = document.getElementById('tokenUsage');
+      if (tokenUsageEl) tokenUsageEl.classList.add('show');
+      
+      // 统计看板
+      const statTokenUsageEl = document.getElementById('statTokenUsage');
+      if (statTokenUsageEl) statTokenUsageEl.textContent = CONFIG.tokenStats.total.toLocaleString();
     }
 
     function parseRecognitionResult(content) {
