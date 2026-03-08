@@ -617,29 +617,41 @@
     let selectedFile = null;
     let imageBase64 = null;
 
-    // ==================== 版本切换 ====================
-    function toggleVersionDropdown() {
-      document.getElementById('versionDropdown').classList.toggle('show');
-    }
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.version-switcher')) {
-        document.getElementById('versionDropdown').classList.remove('show');
+    // ==================== DOM 加载完成后初始化 ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ DOM 加载完成，初始化事件监听器...');
+      
+      // ==================== 版本切换 ====================
+      function toggleVersionDropdown() {
+        document.getElementById('versionDropdown').classList.toggle('show');
       }
-    });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.version-switcher')) {
+          document.getElementById('versionDropdown').classList.remove('show');
+        }
+      });
 
-    // ==================== 模块切换 ====================
-    document.querySelectorAll('.menu-item').forEach(item => {
-      item.addEventListener('click', function() {
-        document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-        this.classList.add('active');
-        const moduleId = this.dataset.module;
-        document.querySelectorAll('.module-container').forEach(m => m.classList.remove('active'));
-        document.getElementById('module-' + moduleId).classList.add('active');
-        if (moduleId === 'recipe-list') loadRecipeListVirtual();
-        if (moduleId === 'waterfall') loadWaterfall();
-        if (moduleId === 'dimension-network') loadDimensionNetwork();
-        if (moduleId === 'dimension-manager') loadDimensionManager();
-        if (moduleId === 'stats') loadStats();
+      // ==================== 模块切换 ====================
+      const menuItems = document.querySelectorAll('.menu-item');
+      console.log('📋 找到菜单项数量:', menuItems.length);
+      menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+          console.log('🔵 点击菜单:', this.dataset.module);
+          document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+          const moduleId = this.dataset.module;
+          document.querySelectorAll('.module-container').forEach(m => m.classList.remove('active'));
+          const targetModule = document.getElementById('module-' + moduleId);
+          console.log('🎯 目标模块:', targetModule?.id);
+          if (targetModule) {
+            targetModule.classList.add('active');
+          }
+          if (moduleId === 'recipe-list') loadRecipeListVirtual();
+          if (moduleId === 'waterfall') loadWaterfall();
+          if (moduleId === 'dimension-network') loadDimensionNetwork();
+          if (moduleId === 'dimension-manager') loadDimensionManager();
+          if (moduleId === 'stats') loadStats();
+        });
       });
     });
 
