@@ -249,9 +249,9 @@
       <div class="top-bar-left">
         <span class="top-bar-logo">🍳 智能菜谱中台</span>
         <nav class="top-bar-nav">
-          <a href="#" class="active" onclick="switchModule('ai-recognize',this)">需求录入</a>
-          <a href="#" onclick="switchModule('recipe-list',this)">菜谱库</a>
-          <a href="#" onclick="switchModule('dimension-manager',this)">维度管理</a>
+          <a href="#" class="active" data-module="ai-recognize">需求录入</a>
+          <a href="#" data-module="recipe-list">菜谱库</a>
+          <a href="#" data-module="dimension-manager">维度管理</a>
         </nav>
       </div>
       <div class="top-bar-right">
@@ -268,17 +268,17 @@
       <aside class="left-sidebar">
         <div class="nav-group">
           <div class="nav-group-title">核心功能</div>
-          <a class="nav-item active" onclick="switchModule('ai-recognize',this)">
+          <a class="nav-item active" data-module="ai-recognize">
             <span class="nav-icon">🤖</span>
             <span class="nav-label">AI 图片识别</span>
             <span class="domain-badge domain-badge-rds" style="margin-left:auto;padding:2px 6px;font-size:10px">需求端</span>
           </a>
-          <a class="nav-item" onclick="switchModule('recipe-list',this)">
+          <a class="nav-item" data-module="recipe-list">
             <span class="nav-icon">📋</span>
             <span class="nav-label">菜谱列表</span>
             <span class="domain-badge domain-badge-recipe" style="margin-left:auto;padding:2px 6px;font-size:10px">交付端</span>
           </a>
-          <a class="nav-item" onclick="switchModule('waterfall',this)">
+          <a class="nav-item" data-module="waterfall">
             <span class="nav-icon">🌊</span>
             <span class="nav-label">瀑布流详情</span>
             <span class="domain-badge domain-badge-recipe" style="margin-left:auto;padding:2px 6px;font-size:10px">交付端</span>
@@ -286,15 +286,15 @@
         </div>
         <div class="nav-group">
           <div class="nav-group-title">分析工具</div>
-          <a class="nav-item" onclick="switchModule('dimension-network',this)">
+          <a class="nav-item" data-module="dimension-network">
             <span class="nav-icon">🕸️</span>
             <span class="nav-label">维度网络</span>
           </a>
-          <a class="nav-item" onclick="switchModule('dimension-manager',this)">
+          <a class="nav-item" data-module="dimension-manager">
             <span class="nav-icon">📊</span>
             <span class="nav-label">维度管理器</span>
           </a>
-          <a class="nav-item" onclick="switchModule('stats',this)">
+          <a class="nav-item" data-module="stats">
             <span class="nav-icon">📈</span>
             <span class="nav-label">统计看板</span>
           </a>
@@ -474,6 +474,43 @@
   </div>
 
   <script>
+    // ==================== 模块切换 - V14 新增 ====================
+    function setupModuleSwitch() {
+      // Left Sidebar 菜单点击
+      document.querySelectorAll('.left-sidebar .nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          document.querySelectorAll('.left-sidebar .nav-item').forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+          const moduleId = this.dataset.module;
+          switchModule(moduleId);
+        });
+      });
+      
+      // Top Bar 导航点击
+      document.querySelectorAll('.top-bar-nav a').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelectorAll('.top-bar-nav a').forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+          const moduleId = this.dataset.module;
+          document.querySelectorAll('.left-sidebar .nav-item').forEach(i => i.classList.remove('active'));
+          document.querySelector(`.left-sidebar .nav-item[data-module="${moduleId}"]`)?.classList.add('active');
+          switchModule(moduleId);
+        });
+      });
+    }
+    
+    function switchModule(moduleId) {
+      document.querySelectorAll('.module-container').forEach(m => m.classList.remove('active'));
+      document.getElementById('module-' + moduleId)?.classList.add('active');
+      if (moduleId === 'recipe-list') loadRecipeListVirtual();
+      if (moduleId === 'waterfall') loadWaterfall();
+      if (moduleId === 'dimension-network') loadDimensionNetwork();
+      if (moduleId === 'dimension-manager') loadDimensionManager();
+      if (moduleId === 'stats') loadStats();
+      console.log('✅ 模块已切换:', moduleId);
+    }
+    
     // ==================== 配置 ====================
     const CONFIG = {
       apiKey: 'sk-c876ee3e50d64a72a53c8c5f09cc84fb',
@@ -884,6 +921,7 @@
     // ==================== 初始化 ====================
     async function init() {
       try {
+        setupModuleSwitch();
         const res = await fetch('data/recipes-full.json');
         const data = await res.json();
         CONFIG.recipes = data;
