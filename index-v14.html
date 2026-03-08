@@ -247,7 +247,7 @@
     <!-- Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
-        <span class="top-bar-logo">🍳 智能菜谱中台</span>
+        <span class="top-bar-logo">🍳 智能菜谱中台 <span class="cmp-badge" style="margin-left:8px;background:var(--primary-light);color:var(--primary);font-size:11px">V14.1.0</span></span>
         <nav class="top-bar-nav">
           <a href="#" class="active" data-module="ai-recognize">需求录入</a>
           <a href="#" data-module="recipe-list">菜谱库</a>
@@ -380,6 +380,12 @@
                 <div class="info-label">烹饪方式</div>
                 <div class="info-value" id="cookingMethod">-</div>
               </div>
+            </div>
+            
+            <!-- 菜品总结 V14.2.0 新增 -->
+            <div class="cmp-card" id="dishSummary" style="display:none;margin-top:16px;background:var(--domain-rds-light);border:1px solid var(--domain-rds-border)">
+              <div style="font-size:13px;font-weight:600;color:var(--domain-rds);margin-bottom:8px">📝 菜品总结</div>
+              <div style="font-size:14px;color:var(--text-secondary);line-height:1.6" id="dishSummaryText"></div>
             </div>
           </div>
         </div>
@@ -665,6 +671,46 @@
       document.getElementById('confidence').textContent = `${((result.confidence || 0.8) * 100).toFixed(1)}%`;
       document.getElementById('cuisineType').textContent = result.cuisine_type || '家常菜';
       document.getElementById('cookingMethod').textContent = result.cooking_method || '炒';
+      
+      // 菜品总结（新增 V14.2.0）
+      const summaryEl = document.getElementById('dishSummary');
+      const summaryTextEl = document.getElementById('dishSummaryText');
+      if (summaryEl && summaryTextEl) {
+        const summary = result.description || generateAutoSummary(result);
+        summaryTextEl.textContent = summary;
+        summaryEl.style.display = 'block';
+      }
+    }
+    
+    // 自动生成菜品总结（V14.2.0 新增）
+    function generateAutoSummary(result) {
+      const dims = result.dimensions || {};
+      const parts = [];
+      
+      // 口味总结
+      if (dims.experience) {
+        const exp = dims.experience;
+        const flavors = [];
+        if (exp.flavor_type) flavors.push(exp.flavor_type);
+        if (exp.spiciness_level >= 3) flavors.push('辣');
+        if (exp.wok_hei_level >= 3) flavors.push('锅气足');
+        if (flavors.length > 0) parts.push(`口味：${flavors.join('、')}`);
+      }
+      
+      // 场景总结
+      if (dims.scene) {
+        const scene = dims.scene;
+        if (scene.meal_period && scene.consumption_scenario) {
+          parts.push(`适合${scene.meal_period}${scene.consumption_scenario}`);
+        }
+      }
+      
+      // 复杂度总结
+      if (result.complexity) {
+        parts.push(`制作难度：${result.complexity}`);
+      }
+      
+      return parts.length > 0 ? parts.join('；') + '。' : '这是一道经典中式菜品。';
     }
 
     function displayDimensions(result) {
