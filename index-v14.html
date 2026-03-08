@@ -918,24 +918,53 @@
       }, 100);
     }
 
-    // ==================== 维度网络 V12.1 ====================
-    function loadDimensionNetwork() {
-      const dimensions = {
-        scene: {name:'场景维度',icon:'🎯',items:['用餐时段', '消费场景', '业态场地', '高峰压力', '出餐要求']},
-        business: {name:'商业维度',icon:'💰',items:['价格带', '成本敏感度', '毛利属性', '复购频次', '标准化要求']},
-        experience: {name:'体验维度',icon:'👅',items:['味型', '辣度', '麻度', '咸度', '甜度', '锅气感']},
-        region: {name:'地域维度',icon:'🌍',items:['国家菜系', '中国区域', '细分菜系', '风味标签']},
-        people: {name:'人群与限制',icon:'👥',items:['人数规格', '饮食限制', '过敏原', '特殊偏好']},
-        complexity: {name:'复杂度感知',icon:'⚙️',items:['感知复杂度', '制作门槛', '等待成本']}
-      };
-      
-      const grid = document.getElementById('dimensionNetworkGrid');
-      grid.innerHTML = Object.entries(dimensions).map(([key, dim]) => `
-        <div class="dimension-card" style="background:#fff;border-radius:12px;padding:16px;border-left:4px solid var(--primary);box-shadow:0 2px 8px rgba(0,0,0,0.08)">
-          <h4 style="font-size:14px;color:var(--primary);margin-bottom:12px;font-weight:600">${dim.icon} ${dim.name}</h4>
-          ${dim.items.map(d => `<div class="dimension-item" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e0e0e0"><span style="font-size:12px;color:#666">${d}</span><span class="dimension-tag">0</span></div>`).join('')}
-        </div>
-      `).join('');
+    // ==================== 维度网络 V14.4.0 增强版 ====================
+    async function loadDimensionNetwork() {
+      try {
+        // 加载完整维度字典
+        const res = await fetch('data/dimension-dictionary-full.json');
+        const data = await res.json();
+        const allDimensions = data.dimensions || [];
+        
+        // 按域分组
+        const grouped = {
+          rds: { name: '需求端维度', icon: '🎯', items: [], color: 'var(--domain-rds)' },
+          recipe: { name: '交付端维度', icon: '⚙️', items: [], color: 'var(--domain-recipe)' },
+          knob: { name: '控制变量', icon: '🎛️', items: [], color: 'var(--domain-knob)' }
+        };
+        
+        // 分类统计
+        allDimensions.forEach(d => {
+          const domain = d.domain || 'rds';
+          if (grouped[domain]) {
+            grouped[domain].items.push(d);
+          }
+        });
+        
+        const grid = document.getElementById('dimensionNetworkGrid');
+        grid.innerHTML = Object.entries(grouped).map(([key, group]) => `
+          <div class="dimension-card" style="background:#fff;border-radius:12px;padding:20px;border-left:4px solid ${group.color};box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+            <h4 style="font-size:16px;color:${group.color};margin-bottom:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center">
+              <span>${group.icon} ${group.name}</span>
+              <span class="cmp-badge" style="background:${group.color}22;color:${group.color}">${group.items.length}个维度</span>
+            </h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
+              ${group.items.slice(0, 30).map(d => `
+                <div style="padding:8px 12px;background:${group.color}11;border-radius:6px;font-size:12px;color:var(--text-secondary);border:1px solid ${group.color}22">
+                  <div style="font-weight:600;color:var(--text-primary);margin-bottom:4px">${d.dimension_name_cn}</div>
+                  <div style="font-size:10px;color:var(--text-tertiary)">${d.dimension_id}</div>
+                </div>
+              `).join('')}
+              ${group.items.length > 30 ? `<div style="padding:8px 12px;text-align:center;font-size:12px;color:var(--text-tertiary)">+ 更多 ${group.items.length - 30} 个维度</div>` : ''}
+            </div>
+          </div>
+        `).join('');
+        
+        console.log('✅ 维度网络加载完成 | 总维度数:', allDimensions.length);
+      } catch (e) {
+        console.error('❌ 加载维度网络失败:', e);
+        document.getElementById('dimensionNetworkGrid').innerHTML = '<div style="padding:40px;text-align:center;color:var(--error)">加载失败，请检查数据文件</div>';
+      }
     }
 
     // ==================== 维度管理器 ====================
